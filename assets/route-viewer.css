@@ -1,0 +1,677 @@
+/* The client route viewer — "the spine".
+ *
+ * One component, three surfaces: the phone spine, the desktop spine with a
+ * named index down the left, and the printed sheet (which is produced by mpdf
+ * from app/Views/routine-detail-pdf.php, not from this file — the @media print
+ * block here only stops a browser print of the portal page emitting a broken
+ * half-component).
+ *
+ * Ported from the prototype of record,
+ * `home-programme-descriptions/preview/route-corebility.html` (v14), and
+ * specified in `VIEWER-HANDOFF.md`. The type scale is that file's; the
+ * header, the current-station container, the spine and the advance motion
+ * were reworked after the owner's look on 2026-10-05 (cramped header, a wash
+ * that read as janky, text jumping while its size animated); the colours are
+ * `corebility-website/site/src/styles/tokens.css`, and the component language
+ * — tinted rows, 9–12px radii, small circular chips, teal-soft uppercase pill
+ * tags, #eceef1 hairlines, the 8px button with its 1.5px border — is
+ * `cards.css` and `home.css`. Taking only the colours was tried and rejected:
+ * it did not feel like Corebility.
+ *
+ * LIGHT THEME ONLY. No colour in this file may be declared inside a
+ * prefers-color-scheme block.
+ *
+ * Everything is scoped under `.rv` and every token is prefixed `--rv-`, so
+ * this cannot reach the rest of the client portal (which is on its own
+ * `--hp-*` palette and Plus Jakarta Sans).
+ */
+
+.rv {
+  /* tokens.css */
+  --rv-teal: #125c65;
+  --rv-teal-hover: #2a8995;
+  --rv-teal-deep: #0c3e45;
+  --rv-teal-soft: #def0f3;
+  --rv-ink: #181c32;
+  --rv-body: #333333;
+  --rv-muted: #5e6278;
+  --rv-faint: #8891a5;
+  --rv-paper: #ffffff;
+  --rv-paper-2: #f6f6f6;
+  --rv-line: #eceef1;
+  --rv-on-teal: #ffffff;
+  --rv-shadow: 0 1px 2px rgba(24, 28, 50, .04), 0 14px 34px -18px rgba(18, 92, 101, .28);
+  --rv-lift: 0 2px 6px rgba(24, 28, 50, .05), 0 30px 60px -30px rgba(18, 92, 101, .45);
+
+  /* The two the marketing site has no name for, because a marketing site has
+     no warnings and no alternatives. */
+  --rv-care: #8f2f12;
+  --rv-care-soft: #fbeae3;
+  --rv-opt: #6b5320;
+  --rv-opt-soft: #f6f1e6;
+
+  /* v14's #c2c8d2 is 1.7:1 on white, under the 3:1 a UI part needs. The
+     handoff (§9.6) lists darkening it as a fix the engineer may make without
+     design review, so this is #8a93a3 at 3.1:1. State is still carried by
+     dash-versus-solid and by type weight as well as by colour. */
+  --rv-track: #8a93a3;
+  /* The line between dots is decoration: state is carried by the dots
+     (3:1 ring vs solid fill) and by type weight, so it can be light. */
+  --rv-line-ahead: #dfe3e8;
+
+  /* The four literals the handoff requires be promoted out of the prototype. */
+  --rv-chip: #eef1f5;              /* home.css .hp-stat .chip, at rest */
+  --rv-ring-bg: #bcd9dd;           /* the hold ring's unfilled stroke */
+  --rv-ghost-disabled: #b9bfca;    /* disabled ghost button text */
+  /* Rows inside the current station's container: a deeper step of the same
+     teal, not white - white cards on the tint stood out (owner, 2026-10-05). */
+  --rv-branch-now: rgba(18, 92, 101, .075);
+  --rv-wash: rgba(222, 240, 243, .5);   /* = --rv-teal-soft at 50% */
+
+  --rv-font: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* One variable sets the current step; everything supporting it is fixed, so
+     the gap between them narrows rather than stretches as the step grows. */
+  --rv-step: 1.32rem;
+  --rv-step-lh: 1.36;
+
+  /* Measure the component's own box, not the viewport: the portal's grid and
+     (on the app) a 260px rail both make a media query the wrong instrument.
+     JS reads this box and sets data-surf; the declaration is here so a future
+     pure-CSS switch has something to query. */
+  container-type: inline-size;
+
+  margin-top: 4px;
+  color: var(--rv-body);
+  font: 400 1rem/1.6 var(--rv-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+.rv[data-scale="s"] { --rv-step: 1.2rem; --rv-step-lh: 1.4; }
+.rv[data-scale="m"] { --rv-step: 1.32rem; --rv-step-lh: 1.36; }
+.rv[data-scale="l"] { --rv-step: 1.5rem; --rv-step-lh: 1.32; }
+
+.rv[hidden] { display: none; }
+.rv *, .rv *::before, .rv *::after { box-sizing: border-box; }
+.rv :focus-visible { outline: 2px solid var(--rv-teal); outline-offset: 3px; }
+
+.rv-sr {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------- the frame, as a site panel ---------- */
+.rv-frame {
+  background: var(--rv-paper);
+  border: 1px solid var(--rv-line);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--rv-lift);
+  height: 676px;
+}
+.rv[data-surf="desk"] .rv-frame { height: 640px; }
+
+/* The header names the exercise and says where you are in it. The eyebrow
+   lives in here rather than floating above the card, and the meta is a row of
+   the site's chips rather than a line of small grey text crammed under the
+   title. The progress bar closes the header: it is the first thing the eye
+   lands on after the name, which is where "how far along am I" belongs. */
+.rv-head {
+  flex: none;
+  padding: 1.25rem 1.25rem 1.1rem;
+  border-bottom: 1px solid var(--rv-line);
+  background: var(--rv-paper);
+}
+.rv[data-surf="desk"] .rv-head {
+  padding: 1.3rem 1.75rem 1.15rem;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 1.5rem;
+  align-items: end;
+}
+/* On a wide box the chips sit opposite the title instead of under it, so the
+   header is three short rows rather than four. */
+.rv[data-surf="desk"] .rv-eyebrow { grid-column: 1 / -1; }
+.rv[data-surf="desk"] .rv-meta { margin: 0 0 .2rem; justify-content: flex-end; }
+.rv[data-surf="desk"] .rv-progress { grid-column: 1 / -1; }
+
+.rv-eyebrow {
+  display: flex; align-items: center; gap: .5rem;
+  font: 700 .68rem/1 var(--rv-font);
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--rv-teal); margin: 0 0 .6rem;
+}
+.rv-head h3 {
+  font: 700 1.22rem/1.25 var(--rv-font);
+  letter-spacing: -.015em; color: var(--rv-ink); margin: 0;
+}
+.rv[data-surf="desk"] .rv-head h3 { font-size: 1.38rem; }
+
+/* The meta is a quiet line of text, separated by middots - not chips (tried
+   2026-10-05, read as grey lozenges competing with the title). What was
+   wrong with the original line was size and cramping, not the idea. */
+.rv-meta {
+  list-style: none; padding: 0;
+  margin: .4rem 0 0;
+  display: flex; flex-wrap: wrap; align-items: center;
+  font: 500 .86rem/1.4 var(--rv-font);
+  color: var(--rv-muted);
+  font-variant-numeric: tabular-nums;
+}
+.rv-meta:empty { display: none; }
+.rv-meta li + li::before {
+  content: "\00b7"; margin: 0 .5rem; color: var(--rv-faint);
+}
+
+.rv-progress {
+  list-style: none; padding: 0;
+  margin: 1rem 0 0;
+  display: flex; gap: 3px; height: 4px;
+}
+.rv-progress li {
+  flex: 1; border-radius: 2px; background: var(--rv-line);
+  transition: background-color .3s ease;
+}
+.rv-progress li.is-care { background: var(--rv-care-soft); }
+.rv-progress li.is-done,
+.rv-progress li.is-now { background: var(--rv-teal); }
+.rv-progress.is-dense { gap: 0; border-radius: 2px; overflow: hidden; }
+.rv-progress.is-dense li { border-radius: 0; }
+
+/* ---------- the index: the site's row list with its circular chip ---------- */
+.rv-mid { flex: 1; display: flex; min-height: 0; }
+.rv-index { display: none; }
+.rv[data-surf="desk"] .rv-index {
+  display: block; flex: none; width: 236px;
+  background: var(--rv-paper-2);
+  border-right: 1px solid var(--rv-line);
+  overflow-y: auto; padding: .8rem .7rem;
+}
+.rv-ix {
+  display: flex; align-items: center; gap: .6rem;
+  width: 100%; border: 0; text-align: left;
+  font: inherit; font-size: .84rem; color: var(--rv-muted);
+  padding: .55rem .6rem; min-height: 44px; cursor: pointer;
+  background: transparent; border-radius: 9px; margin-bottom: .2rem;
+  transition: background .22s ease, color .22s ease, box-shadow .22s ease;
+}
+.rv-ix:hover { background: var(--rv-paper); }
+.rv-ix b {
+  font-variant-numeric: tabular-nums;
+  font: 700 .62rem/1 var(--rv-font);
+  width: 22px; height: 22px; flex: none; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--rv-chip); color: var(--rv-muted);
+  transition: background .24s ease, color .24s ease;
+}
+.rv-ix span { min-width: 0; overflow-wrap: anywhere; }
+.rv-ix.is-done b { background: var(--rv-teal-soft); color: var(--rv-teal); }
+.rv-ix.is-now {
+  background: var(--rv-paper); color: var(--rv-ink);
+  font-weight: 700; box-shadow: var(--rv-shadow);
+}
+.rv-ix.is-now b { background: var(--rv-teal); color: #fff; }
+.rv-ix-care {
+  width: 0; height: 0; flex: none; margin-left: auto;
+  border-left: 4px solid transparent; border-right: 4px solid transparent;
+  border-bottom: 7px solid var(--rv-care);
+}
+.rv-ix-hold {
+  width: 11px; height: 11px; border-radius: 50%;
+  border: 2px solid var(--rv-track); flex: none; margin-left: auto;
+}
+.rv-ix.is-done .rv-ix-hold, .rv-ix.is-now .rv-ix-hold { border-color: var(--rv-teal); }
+
+/* ---------- the spine ---------- */
+/* Breathing room above the first station: it used to start hard under the
+   header's rule. */
+.rv-scroll { flex: 1; overflow-y: auto; position: relative; padding: 1rem 0 1.5rem; }
+.rv-spine { list-style: none; margin: 0; padding: 0; }
+.rv-spine > li {
+  /* Where the dot sits, measured from the top of the row: the middle of the
+     first line, which is the eyebrow when there is one and the sentence when
+     there is not. Every row has the same top padding, so the only thing that
+     changes size on advance is the sentence itself. */
+  --rv-pad: 1.55rem;
+  /* Half the label's line (.7rem at line-height 1). Everything here is in
+     rem: the client portal's root is 12px, not 16, and an anchor that mixed
+     px with rem put the dot ~6px off its label there (owner, 2026-10-05). */
+  --rv-anchor: calc(var(--rv-pad) + .35rem);
+  position: relative; display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  padding-right: 1.15rem;
+}
+.rv-spine > li:not(.has-label) { --rv-anchor: calc(var(--rv-pad) + .795rem); }        /* 1.06rem x 1.5 / 2 */
+.rv-spine > li.is-done:not(.has-label) { --rv-anchor: calc(var(--rv-pad) + .7125rem); } /* .95rem x 1.5 / 2 */
+.rv-spine > li:not(.has-label).is-now { --rv-anchor: calc(var(--rv-pad) + var(--rv-step) * var(--rv-step-lh) / 2); }
+.rv[data-surf="desk"] .rv-spine > li {
+  grid-template-columns: 64px minmax(0, 1fr); padding-right: 2.2rem;
+}
+.rv[data-surf="desk"] .rv-spine > li:not(.has-label).is-now { --rv-anchor: calc(var(--rv-pad) + var(--rv-step) * 1.08 * var(--rv-step-lh) / 2); }
+
+/* The current station sits in a container: an inset, rounded panel in the
+   teal-soft tint, spanning the rail and the text, rather than a gradient
+   washed edge to edge that faded out part-way across. A pseudo-element so it
+   can fade in place instead of appearing; no coloured edge rule, on purpose. */
+.rv-spine > li::before {
+  content: ""; position: absolute; pointer-events: none; opacity: 0;
+  inset: 4px .55rem 4px .4rem;
+  border-radius: 14px;
+  background: var(--rv-wash);
+  border: 1px solid var(--rv-teal-soft);
+  transition: opacity .28s ease;
+}
+.rv[data-surf="desk"] .rv-spine > li::before { inset: 2px 1.2rem 2px .7rem; }
+/* Arrives with the dot, not before it: the line draws down, then the dot
+   fills and the container fades in together (same .4s delay as the dot).
+   Leaving has no delay, so the old station lets go as the line starts. */
+.rv-spine > li.is-now::before { opacity: 1; transition-delay: .4s; }
+.rv-spine > li.is-folded { display: none; }
+.rv-rail, .rv-body { position: relative; z-index: 1; }
+.rv-rail { display: flex; justify-content: center; }
+
+/* One continuous line, light ahead and teal behind, running INTO the dots
+   rather than stopping short of them in dashes. Each segment has a solid teal
+   overlay that scales from the top, so advancing draws the line downward. */
+.rv-seg {
+  position: absolute; left: 50%; translate: -50% 0; width: 2px; overflow: hidden;
+  background: var(--rv-line-ahead);
+}
+.rv-seg-up { top: 0; height: var(--rv-anchor); }
+.rv-seg-dn { top: var(--rv-anchor); bottom: 0; }
+.rv-seg::after {
+  content: ""; position: absolute; inset: 0; background: var(--rv-teal);
+  transform: scaleY(0); transform-origin: top center;
+  transition: transform .38s cubic-bezier(.32, .72, .3, 1);
+}
+.rv-spine > li.is-done .rv-seg::after,
+.rv-spine > li.is-now .rv-seg-up::after { transform: scaleY(1); }
+/* On advance the line arrives first and the dot fills when it gets there:
+   the segment leaving the old station, then the one entering the new, then
+   the dot. The delays sit on the arriving state only, so going Back (and
+   jumping from the index) still undoes everything at once. */
+.rv-spine > li.is-done .rv-seg-dn::after { transition-duration: .26s; transition-timing-function: cubic-bezier(.45, 0, .55, 1); }
+.rv-spine > li.is-now .rv-seg-up::after {
+  transition-duration: .2s; transition-delay: .22s; transition-timing-function: cubic-bezier(.3, .6, .4, 1);
+}
+/* The fold row is always the first <li>, so when there is no lead-in the
+   first station is not :first-child and its line used to poke up above the
+   first dot as a stray tick. */
+.rv-spine > li:first-child .rv-seg-up,
+.rv-spine > .rv-fold:first-child + li .rv-seg-up,
+.rv-spine > li:last-child .rv-seg-dn { display: none; }
+
+/* Above both segments. The lower segment comes after the node in the markup,
+   so without this it painted straight through the hollow dots and the halo. */
+.rv-node {
+  z-index: 1;
+  position: absolute; top: calc(var(--rv-anchor) - 22px); left: 50%; translate: -50% 0;
+  width: 44px; height: 44px;
+  border: 0; background: none; padding: 0; display: grid; place-items: center; cursor: pointer;
+}
+/* The dot never changes size - it changes fill and gains a halo - so nothing
+   around it moves. Ahead: hollow, in the 3:1 track grey. Done: solid teal.
+   Now: solid teal inside a teal-soft ring. */
+.rv-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--rv-paper); border: 2px solid var(--rv-track);
+  box-shadow: 0 0 0 0 var(--rv-teal-soft);
+  transition: background-color .24s ease, border-color .24s ease, box-shadow .3s ease;
+}
+.rv-spine > li.is-done .rv-dot { background: var(--rv-teal); border-color: var(--rv-teal); }
+.rv-spine > li.is-now .rv-dot {
+  background: var(--rv-teal); border-color: var(--rv-teal);
+  box-shadow: 0 0 0 5px var(--rv-teal-soft);
+  transition-delay: .4s, .4s, .44s;
+}
+.rv-spine > li.is-finish .rv-dot { border-radius: 3px; }
+.rv-node:hover .rv-dot { border-color: var(--rv-teal); }
+
+.rv-body { padding: var(--rv-pad) 0 .85rem; min-width: 0; }
+.rv-spine > li.is-now .rv-body { padding-bottom: 1.4rem; }
+
+/* The label is a plain small-caps eyebrow, not the status pill. The site's
+   leading dash was dropped on 2026-10-05 (owner: not wanted). A
+   filled teal badge above the instruction competed with it for the eye; the
+   eyebrow names the step and then gets out of the way, which is the job. The
+   status pill survives as .rv-pill inside branch rows. */
+.rv-label {
+  transition: color .26s ease;
+  /* A block exactly one text-line tall, so the dot's anchor can be computed
+     from it; inline it sat in the paragraph's taller line box. */
+  display: flex; align-items: center; gap: .45rem; line-height: 1;
+  font: 700 .7rem/1 var(--rv-font);
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--rv-muted); background: none; padding: 0; margin: 0 0 .5rem;
+}
+.rv-spine > li.is-now .rv-label { color: var(--rv-teal); }
+.rv-spine > li.is-done .rv-label { color: var(--rv-faint); }
+
+.rv-say {
+  margin: 0; font: 400 1.06rem/1.5 var(--rv-font); color: var(--rv-body);
+  /* Colour only. Animating font-size re-wrapped the sentence on every frame,
+     which is what made the text jump around on advance; the size now changes
+     at once and the new current sentence fades up into place instead. */
+  transition: color .26s ease;
+}
+.rv-spine > li.is-done .rv-say { font-size: .95rem; color: var(--rv-muted); }
+.rv-spine > li.is-now .rv-say {
+  font: 500 var(--rv-step)/var(--rv-step-lh) var(--rv-font);
+  letter-spacing: -.01em; color: var(--rv-ink);
+  animation: rv-arrive .32s cubic-bezier(.32, .72, .3, 1) both;
+}
+.rv-spine > li.is-now .rv-branch { animation: rv-arrive .32s .05s cubic-bezier(.32, .72, .3, 1) both; }
+/* The hold block only exists on the current station and is drawn in the
+   container's deeper teal, so it arrives WITH the container (same .4s delay),
+   not before it on bare white. */
+.rv-spine > li.is-now .rv-hold { animation: rv-arrive .28s .4s ease both; }
+@keyframes rv-arrive {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.rv[data-surf="desk"] .rv-say { max-width: 54ch; }
+.rv[data-surf="desk"] .rv-branch { max-width: 58ch; }
+.rv[data-surf="desk"] .rv-spine > li.is-now .rv-say {
+  font-size: calc(var(--rv-step) * 1.08); max-width: 40ch;
+}
+
+/* ---------- branches, as the site's tinted rows ---------- */
+.rv-branch {
+  margin: .8rem 0 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: .45rem;
+}
+.rv-branch li {
+  position: relative; margin-left: 20px; padding: .55rem .75rem;
+  font: 400 .93rem/1.5 var(--rv-font);
+  color: var(--rv-muted); background: transparent; border-radius: 10px;
+  transition: background-color .3s ease, color .26s ease;
+}
+/* Rows only become cards on the current station (owner, 2026-10-05). Off
+   it they are plain text with their pill - the padding stays, so nothing
+   moves when the tint arrives - which keeps the highlighted station the one
+   thing on the spine drawn as a filled block. */
+.rv-branch li::before {
+  content: ""; position: absolute; left: -20px; top: .85rem; height: 11px; width: 11px;
+  border-left: 2px solid var(--rv-track); border-bottom: 2px solid var(--rv-track);
+  border-bottom-left-radius: 5px; transition: border-color .26s ease;
+}
+.rv-spine > li.is-now .rv-branch li {
+  color: var(--rv-body); background: var(--rv-branch-now);
+  /* The rows take their deeper teal as the container fades in, not the
+     instant the station is chosen - otherwise they flash teal on white for
+     .4s before the container behind them arrives. */
+  transition-delay: .4s;
+}
+.rv-spine > li.is-now .rv-branch li::before { border-color: var(--rv-teal); }
+
+.rv-pill {
+  font: 700 .6rem/1 var(--rv-font);
+  text-transform: uppercase; letter-spacing: .04em;
+  padding: .25rem .45rem; border-radius: 999px;
+  background: var(--rv-teal-soft); color: var(--rv-teal);
+  margin-right: .5rem; white-space: nowrap; font-style: normal;
+  display: inline-flex; align-items: center;
+}
+/* The tag (pill, and the standing marker when there is one) sits on its own
+   line above the text, so every line of the text starts at the same edge.
+   Inline, a wrapped second line ran back under the pill and the rows looked
+   misaligned (owner, 2026-10-05; the same on every surface - a hanging
+   indent was mocked for desktop and not chosen). */
+.rv-tag { display: flex; flex-wrap: wrap; align-items: center; gap: .1rem .5rem; margin-bottom: .3rem; }
+.rv-tag .rv-pill { margin-right: 0; }
+.rv-tag .rv-standing { margin-right: 0; }
+.rv-text { display: block; }
+.rv-branch li.is-option { font-style: italic; }
+.rv-branch li.is-option .rv-tag { font-style: normal; }
+.rv-branch li.is-option .rv-pill { background: var(--rv-opt-soft); color: var(--rv-opt); }
+.rv-branch li.is-caution { color: var(--rv-care); }
+.rv-spine > li.is-now .rv-branch li.is-caution { background: var(--rv-care-soft); color: var(--rv-ink); }
+.rv-branch li.is-caution::before { border-color: var(--rv-care); }
+.rv-branch li.is-caution .rv-pill { background: var(--rv-care); color: #fff; }
+
+/* A caution her own words said applies throughout has been MOVED to station 1.
+   Without saying so, a warning about the whole exercise reads as a warning
+   about getting into position. */
+.rv-standing {
+  font: 400 .72rem/1 var(--rv-font);
+  font-style: normal; text-transform: none; letter-spacing: 0;
+  color: var(--rv-care); margin-right: .5rem;
+}
+.rv-spine > li.is-now .rv-branch li.is-caution .rv-standing { color: var(--rv-care); }
+
+.rv-leadin { font: 400 .86rem/1.5 var(--rv-font); color: var(--rv-muted); margin: 0 0 .35rem; }
+.rv-leadin:last-child { margin-bottom: 0; }
+
+/* ---------- the hold ---------- */
+/* A status line over the bar, in the current station's deeper-teal block.
+   The bar is also the control (owner, 2026-10-05): its left end carries the
+   go icon (play / cancel / pause) and, once paused, the reset icon; its
+   right end the seconds. The fill is teal while holding and teal-deep past
+   the target (it keeps counting, as "+Ns"). Same on every surface. */
+.rv-hold {
+  margin-top: .9rem; display: none; flex-direction: column; gap: .6rem;
+  border-radius: 12px; padding: .8rem .9rem;
+}
+.rv-spine > li.is-now .rv-hold { display: flex; background: var(--rv-branch-now); }
+
+.rv-hold-top { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; }
+.rv-hold-copy { margin: 0; min-width: 0; font: 400 .84rem/1.4 var(--rv-font); color: var(--rv-muted); }
+.rv-hold-head { font: 700 .88rem/1.4 var(--rv-font); color: var(--rv-teal-deep); }
+
+.rv-hbar {
+  position: relative; min-height: 52px; border-radius: 12px; overflow: hidden;
+  background: var(--rv-paper); box-shadow: inset 0 0 0 1.5px var(--rv-ring-bg);
+}
+/* Full width, clipped from the right: a clip, not a scale, so the white copy
+   of the face inside it is not stretched. */
+.rv-hbar-fill {
+  position: absolute; inset: 0; background: var(--rv-teal);
+  clip-path: inset(0 100% 0 0);
+}
+.rv-hold.is-over .rv-hbar-fill { background: var(--rv-teal-deep); }
+
+/* The face: icons at the left, seconds at the right. Two copies at the same
+   place - dark on the track, white inside the fill. */
+.rv-hbar-face {
+  position: absolute; inset: 0; display: flex; align-items: center; gap: .1rem;
+  padding: 0 1rem 0 .55rem; color: var(--rv-teal-deep); pointer-events: none;
+}
+.rv-hbar-face.is-inv, .rv-hbar-face.is-inv .rv-hold-n small { color: #fff; }
+.rv-ico-go, .rv-ico-reset { width: 40px; height: 40px; display: grid; place-items: center; flex: none; }
+/* Reset sits right up against play (owner, 2026-10-05). */
+.rv-ico-reset { margin-left: -.55rem; }
+.rv-ico-reset { visibility: hidden; }
+.rv-hold[data-phase="paused"] .rv-ico-reset { visibility: visible; }
+
+.rv-hold-n {
+  margin-left: auto; display: inline-flex; align-items: baseline; gap: .2rem;
+  font-variant-numeric: tabular-nums;
+}
+.rv-hold-n b { font: 700 1.45rem/1 var(--rv-font); letter-spacing: -.02em; }
+.rv-hold-n small { font: 600 .72rem/1 var(--rv-font); color: var(--rv-muted); }
+.rv-hold.is-go .rv-hold-n b { display: inline-block; animation: rv-go .45s cubic-bezier(.34, 1.4, .5, 1); }
+@keyframes rv-go {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+
+/* The two controls are transparent buttons laid over the face: go over the
+   whole bar, reset (paused only) over its icon and above go. */
+.rv-hold-go, .rv-hold-reset {
+  position: absolute; border: 0; padding: 0; margin: 0; background: transparent;
+  cursor: pointer; border-radius: 12px;
+}
+.rv-hold-go { inset: 0; }
+.rv-hold-reset { top: 0; bottom: 0; left: calc(.55rem + 40px + .1rem - .55rem - 2px); width: 44px; z-index: 1; border-radius: 10px; }
+.rv-hold-reset[hidden] { display: none; }
+.rv-hold-go:hover { background: rgba(18, 92, 101, .05); }
+.rv-hold-reset:hover { background: rgba(18, 92, 101, .08); }
+.rv-hold-go:focus-visible, .rv-hold-reset:focus-visible { outline-offset: -3px; }
+
+/* ---------- the collapsed run ---------- */
+/* `.rv-spine > li` is (0,1,1) and a bare `.rv-fold` would be (0,1,0), so
+   display:grid would win and the row would paint as a phantom band above the
+   list even when it is off. */
+.rv-spine > li.rv-fold { display: none; grid-template-columns: 52px minmax(0, 1fr); }
+.rv-spine > li.rv-fold.is-on { display: grid; }
+/* Must out-rank the rule above, or the fold's rail sits at 48px on desktop
+   while every station sits at 64px and the line steps sideways. */
+.rv[data-surf="desk"] .rv-spine > li.rv-fold { grid-template-columns: 64px minmax(0, 1fr); }
+.rv-fold .rv-seg-up { height: 100%; background: var(--rv-teal); }
+.rv-fold .rv-seg-dn { display: none; }
+.rv-fold button {
+  grid-column: 2; justify-self: start;
+  font: 700 .76rem/1 var(--rv-font); color: var(--rv-teal);
+  background: transparent; border: 1px solid var(--rv-line); border-radius: 999px;
+  /* 44, not v14's 36: the handoff lists raising it as an a11y fix (§9.6). */
+  padding: 0 .9rem; min-height: 44px; margin: .4rem 0; cursor: pointer;
+  white-space: normal;
+}
+.rv-fold button:hover { background: var(--rv-teal-soft); border-color: var(--rv-teal-soft); }
+
+/* ---------- the actions bar ---------- */
+.rv-bar {
+  flex: none; padding: .85rem 1rem;
+  border-top: 1px solid var(--rv-line);
+  display: flex; flex-direction: column; align-items: stretch; gap: .8rem;
+  background: var(--rv-paper);
+}
+.rv[data-surf="desk"] .rv-bar { padding: 1rem 1.75rem; }
+.rv-barrow { display: flex; align-items: center; gap: .7rem; }
+.rv-pos {
+  font: 600 .78rem/1 var(--rv-font); color: var(--rv-muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+/* In the narrow card the two buttons give the position label room. */
+.rv[data-mode="compact"] .rv-barrow { gap: .55rem; }
+.rv[data-mode="compact"] .rv-back { min-width: 0; padding-left: 1rem; padding-right: 1rem; }
+.rv[data-mode="compact"] .rv-next { min-width: 0; padding-left: 1.1rem; padding-right: 1.1rem; }
+.rv-spacer { flex: 1; }
+
+/* The site's button: 8px, a 1.5px border, 600 at .92rem. */
+.rv-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .85rem 1.5rem; min-height: 46px;
+  border: 1.5px solid var(--rv-teal); border-radius: 8px;
+  font: 600 .92rem/1 var(--rv-font); text-decoration: none;
+  background: var(--rv-teal); color: var(--rv-on-teal);
+  cursor: pointer; white-space: normal;
+  transition: background .15s ease, border-color .15s ease;
+}
+.rv-btn:hover { background: var(--rv-teal-hover); border-color: var(--rv-teal-hover); }
+.rv-btn.is-ghost { background: transparent; color: var(--rv-teal); border-color: var(--rv-line); }
+.rv-btn.is-ghost:hover { background: var(--rv-teal-soft); border-color: var(--rv-teal-soft); }
+.rv-btn[disabled] {
+  background: var(--rv-paper-2); border-color: var(--rv-line);
+  color: var(--rv-faint); cursor: default;
+}
+.rv-btn.is-ghost[disabled] { background: transparent; color: var(--rv-ghost-disabled); }
+.rv-next { min-width: 9.5rem; }
+.rv-back { min-width: 4.4rem; }
+
+/* ---------- long words ---------- */
+.rv:lang(de) .rv-say,
+.rv:lang(de) .rv-branch li,
+.rv:lang(de) .rv-ix span,
+.rv:lang(de) .rv-btn,
+.rv:lang(de) .rv-fold button {
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphenate-limit-chars: 8 4 4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv *, .rv *::before, .rv *::after {
+    transition-duration: .001ms !important;
+    animation-duration: .001ms !important;
+  }
+}
+
+/* The printed sheet is the PDF, produced server-side by mpdf. A browser print
+   of the portal page is not that sheet, so the frame is dropped rather than
+   emitted as a cropped 676px box with a Next button on it. */
+@media print {
+  .rv { display: none !important; }
+}
+
+/* ---------- inside the video card (client portal) ---------- */
+/* The card already names the exercise, so the viewer drops its own eyebrow
+   and title there, and its frame loses the floating-panel shadow. */
+.hp-player .rv { margin: .9rem 0 .4rem; }
+.hp-player .rv .rv-eyebrow,
+.hp-player .rv .rv-title { display: none; }
+.hp-player .rv .rv-frame { box-shadow: none; }
+.hp-player .rv .rv-meta { margin-top: 0; }
+.hp-player .rv[data-mode="full"] .rv-frame { height: 560px; }
+
+/* Compact: the station the client is on, with the top of the next one
+   peeking out below it and fading away, inside its own outlined card - the
+   spine stays visible, so it still reads as a route with more to come
+   (owner, 2026-10-05). The rest of the route is one tap away. */
+.rv[data-mode="compact"] .rv-frame {
+  height: auto; overflow: hidden;
+  border: 1.5px solid var(--rv-ring-bg); border-radius: 16px;
+  background: var(--rv-paper);
+}
+.rv[data-mode="compact"] .rv-head { padding: .85rem 1rem .7rem; border-bottom: 0; }
+.rv[data-mode="compact"] .rv-index { display: none; }
+.rv[data-mode="compact"] .rv-scroll { overflow: visible; padding: 0; }
+.rv[data-mode="compact"] .rv-spine > li { display: none; }
+.rv[data-mode="compact"] .rv-spine > li.is-now { display: grid; }
+.rv[data-mode="compact"] .rv-spine > li.is-now + li[data-i] {
+  display: grid; max-height: 4.6rem; overflow: hidden; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 15%, transparent 95%);
+          mask-image: linear-gradient(to bottom, #000 15%, transparent 95%);
+}
+/* The current station's line up is drawn only when there is a station
+   above it on screen - in compact there never is. */
+.rv[data-mode="compact"] .rv-spine > li.is-now .rv-seg-up { display: none; }
+.rv[data-mode="compact"] .rv-bar { padding: .7rem 1rem .8rem; border-top: 1px solid var(--rv-line); }
+
+/* A fixed window: the current station and the next one peeking, never
+   more than this tall, so a long first station does not fill a phone screen
+   (owner, 2026-10-05). Longer content scrolls inside and fades at the foot. */
+.rv[data-mode="compact"] .rv-scroll {
+  max-height: 19rem; overflow-y: auto; overscroll-behavior: contain;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.2rem), transparent);
+          mask-image: linear-gradient(to bottom, #000 calc(100% - 2.2rem), transparent);
+}
+
+/* Sub-rows (cue, option, caution) are plain: no card, no filled chip. The
+   label is coloured small-caps text - teal, amber, red - the caution's text
+   is red too, and the hook lines up with the label (owner's pick, B1,
+   2026-10-05, over outlined and caution-only-outlined variants). */
+.rv .rv-pill,
+.rv .rv-branch li.is-option .rv-pill,
+.rv .rv-branch li.is-caution .rv-pill {
+  background: none; padding: 0; border-radius: 0; font-size: .64rem; letter-spacing: .08em;
+}
+.rv .rv-branch li .rv-pill { color: var(--rv-teal); }
+.rv .rv-branch li.is-option .rv-pill { color: var(--rv-opt); }
+.rv .rv-branch li.is-caution .rv-pill { color: var(--rv-care); }
+.rv .rv-spine > li.is-now .rv-branch li,
+.rv .rv-spine > li.is-now .rv-branch li.is-caution { background: transparent; }
+.rv .rv-branch li { padding: .2rem .25rem .25rem .1rem; }
+.rv .rv-branch li::before { top: .12rem; }
+.rv .rv-tag { margin-bottom: .15rem; }
+.rv .rv-branch li.is-caution .rv-text,
+.rv .rv-spine > li.is-now .rv-branch li.is-caution .rv-text { color: var(--rv-care); }
+
+/* The expand control: a chevron in the header's corner, not a line of its
+   own (owner, 2026-10-05). 44px target; it turns over when expanded. */
+.rv-head { position: relative; }
+.rv-expand {
+  position: absolute; top: .5rem; right: .5rem;
+  width: 34px; height: 34px; display: grid; place-items: center;
+  border: 0; border-radius: 9px; background: none; cursor: pointer; color: var(--rv-teal);
+}
+/* 34px drawn, 44px to the finger. */
+.rv-expand::after { content: ""; position: absolute; inset: -5px; }
+/* Room under the chevron, so it never sits on the progress bar. */
+.rv[data-mode] .rv-head .rv-progress { margin-top: .9rem; }
+.rv-expand:hover { background: var(--rv-teal-soft); }
+.rv-expand svg { transition: transform .25s ease; }
+.rv-expand[aria-expanded="true"] svg { transform: rotate(180deg); }
+.rv[data-mode] .rv-head .rv-meta { padding-right: 2.6rem; }

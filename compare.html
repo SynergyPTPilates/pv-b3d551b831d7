@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><style>
+body{margin:0;padding:16px;font:600 14px system-ui;background:#fff;color:#16232b}
+.row{display:flex;gap:18px}.c{display:flex;flex-direction:column;gap:6px}
+.crop{overflow:hidden;border:1px solid #ddd;border-radius:6px;position:relative}
+.crop img{position:absolute}
+</style><div class="row" id="r"></div><script>
+var q=new URLSearchParams(location.search), set=q.get('set');
+var defs={cc:{files:['CC-today','CC-compact','CC-toggle'],labels:['Today: 260 px panel with heading and close','Compact menu: no heading, 168 px','One switch (while English is the only track)'],x:640,y:215,w:330,h:250},
+ text:{files:['T-12','T-14','T-16'],labels:['Today: 12 px root (current 15.8 px, others 11.4 px)','14 px root (current 18.5 px, others 13.3 px)','16 px root, the design size (current 21 px, others 15.2 px)'],x:1005,y:275,w:410,h:620}}[set];
+defs.files.forEach(function(f,i){document.getElementById('r').insertAdjacentHTML('beforeend','<div class="c"><div>'+defs.labels[i]+'</div><div class="crop" style="width:'+defs.w+'px;height:'+defs.h+'px"><img src="shots/'+f+'.png" style="left:-'+defs.x+'px;top:-'+defs.y+'px"></div></div>')});
+</script>

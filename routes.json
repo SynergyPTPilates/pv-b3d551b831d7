@@ -1,0 +1,584 @@
+{
+    "clips": [
+        {
+            "title": "Hamstring stretch (hook-lying)",
+            "route": {
+                "stations": [
+                    {
+                        "kind": "setup",
+                        "channel": "seq",
+                        "text": "Start lying on your back with your knees bent.",
+                        "labelFull": "To start",
+                        "branch": [],
+                        "index": 0,
+                        "number": 1,
+                        "label": "To start",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "Bring one leg up towards you and hold on to it behind the knee.",
+                        "labelFull": "The movement",
+                        "branch": [],
+                        "index": 1,
+                        "number": 2,
+                        "label": "The movement",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "Stretch the leg up as straight as you can.",
+                        "labelFull": "The movement",
+                        "branch": [
+                            {
+                                "row": "cue",
+                                "kind": "cue",
+                                "text": "Try and keep the pelvis level and both hips down on the floor at all times.",
+                                "pill": "Cue",
+                                "standing": false
+                            }
+                        ],
+                        "index": 2,
+                        "number": 3,
+                        "label": null,
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "To create a neuroglide, point and flex the foot as you hold the stretch.",
+                        "labelFull": "The movement",
+                        "branch": [],
+                        "index": 3,
+                        "number": 4,
+                        "label": null,
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "hold",
+                        "channel": "hold",
+                        "text": "Hold the stretch for about 60 seconds.",
+                        "labelFull": "The hold",
+                        "branch": [],
+                        "index": 4,
+                        "number": 5,
+                        "label": "The hold",
+                        "finish": false,
+                        "hold": {
+                            "secs": 60,
+                            "range": false,
+                            "hedge": true,
+                            "source": "spoken"
+                        }
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "To help keep the knee straight, you may hold above the knee if you can reach.",
+                        "labelFull": "The movement",
+                        "branch": [],
+                        "index": 5,
+                        "number": 6,
+                        "label": "The movement",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "finish",
+                        "channel": "seq",
+                        "text": "Bend the knee and bring it down to finish.",
+                        "labelFull": "To finish",
+                        "branch": [],
+                        "index": 6,
+                        "number": 7,
+                        "label": "To finish",
+                        "finish": true,
+                        "hold": null
+                    }
+                ],
+                "lead": [],
+                "leadHeading": "Before you start",
+                "localeUsed": "en",
+                "locale": "en",
+                "doseLine": "",
+                "meta": [
+                    "7 stations",
+                    "60s hold"
+                ],
+                "hold": {
+                    "secs": 60,
+                    "range": false,
+                    "hedge": true,
+                    "source": "spoken"
+                },
+                "rendered": 8,
+                "total": 8,
+                "fallback": false
+            },
+            "prose": "Start lying on your back with your knees bent. Bring one leg up towards you and hold on to it behind the knee. Stretch the leg up as straight as you can. Try and keep the pelvis level and both hips down on the floor at all times. To create a neuroglide, point and flex the foot as you hold the stretch. Hold the stretch for about 60 seconds. To help keep the knee straight, you may hold above the knee if you can reach. Bend the knee and bring it down to finish."
+        },
+        {
+            "title": "Shoulder abduction with Theraband (standing)",
+            "route": {
+                "stations": [
+                    {
+                        "kind": "setup",
+                        "channel": "seq",
+                        "text": "Start by stepping on the Theraband on the side of the arm that you would like to work.",
+                        "labelFull": "To start",
+                        "branch": [
+                            {
+                                "row": "caution",
+                                "kind": "caution",
+                                "text": "There should be no pinching or pain at the shoulder throughout.",
+                                "pill": "Careful",
+                                "standing": true
+                            }
+                        ],
+                        "index": 0,
+                        "number": 1,
+                        "label": "To start",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "The arm should be just slightly in front of the leg, but out to the side.",
+                        "labelFull": "The movement",
+                        "branch": [],
+                        "index": 1,
+                        "number": 2,
+                        "label": "The movement",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "Keeping the elbow straight, stretch the arm up to at the most shoulder height and slowly reverse the motion back down.",
+                        "labelFull": "The movement",
+                        "branch": [],
+                        "index": 2,
+                        "number": 3,
+                        "label": null,
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "The motion going downward should take as long as the motion going upward in order to keep control of the band all the time.",
+                        "labelFull": "The movement",
+                        "branch": [
+                            {
+                                "row": "cue",
+                                "kind": "cue",
+                                "text": "Be sure to keep your body still while you're doing the motion.",
+                                "pill": "Cue",
+                                "standing": false
+                            }
+                        ],
+                        "index": 3,
+                        "number": 4,
+                        "label": null,
+                        "finish": false,
+                        "hold": null
+                    }
+                ],
+                "lead": [],
+                "leadHeading": "Before you start",
+                "localeUsed": "en",
+                "locale": "en",
+                "doseLine": "3 sets of 10",
+                "meta": [
+                    "3 sets of 10",
+                    "4 stations"
+                ],
+                "hold": null,
+                "rendered": 6,
+                "total": 6,
+                "fallback": false
+            },
+            "prose": "Start by stepping on the Theraband on the side of the arm that you would like to work. The arm should be just slightly in front of the leg, but out to the side. Keeping the elbow straight, stretch the arm up to at the most shoulder height and slowly reverse the motion back down. The motion going downward should take as long as the motion going upward in order to keep control of the band all the time. Be sure to keep your body still while you're doing the motion. There should be no pinching or pain at the shoulder throughout."
+        },
+        {
+            "title": "Standing quad stretch with foot on a chair",
+            "route": {
+                "stations": [
+                    {
+                        "kind": "setup",
+                        "channel": "seq",
+                        "text": "Stand where you can hold on to the back of a chair or a counter and bring a chair or stool behind you.",
+                        "labelFull": "To start",
+                        "branch": [],
+                        "index": 0,
+                        "number": 1,
+                        "label": "To start",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "Bring one leg up onto the chair and then stand as tall as possible, squeezing the hips forward and the bottom tight.",
+                        "labelFull": "The movement",
+                        "branch": [
+                            {
+                                "row": "cue",
+                                "kind": "cue",
+                                "text": "Try and keep both knees in line with each other as you stand in order to stretch the front of the thigh or the quad muscle.",
+                                "pill": "Cue",
+                                "standing": false
+                            }
+                        ],
+                        "index": 1,
+                        "number": 2,
+                        "label": "The movement",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "repeat",
+                        "channel": "seq",
+                        "text": "Repeat this motion on the other side, bringing the leg up behind you, then standing tall and pulling the hips forward, the bottom in.",
+                        "labelFull": "Repeat",
+                        "branch": [],
+                        "index": 2,
+                        "number": 3,
+                        "label": "Repeat",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "Both legs should be even with each other.",
+                        "labelFull": "The movement",
+                        "branch": [],
+                        "index": 3,
+                        "number": 4,
+                        "label": "The movement",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "In order to increase the stretch, squeeze the bottom more forward and stand up even taller through the lower back.",
+                        "labelFull": "The movement",
+                        "branch": [],
+                        "index": 4,
+                        "number": 5,
+                        "label": null,
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "hold",
+                        "channel": "hold",
+                        "text": "Hold for at least 30 seconds upwards to 2 minutes.",
+                        "labelFull": "The hold",
+                        "branch": [],
+                        "index": 5,
+                        "number": 6,
+                        "label": "The hold",
+                        "finish": false,
+                        "hold": {
+                            "secs": 30,
+                            "range": true,
+                            "hedge": false,
+                            "source": "spoken"
+                        }
+                    }
+                ],
+                "lead": [],
+                "leadHeading": "Before you start",
+                "localeUsed": "en",
+                "locale": "en",
+                "doseLine": "",
+                "meta": [
+                    "6 stations",
+                    "30s minimum hold"
+                ],
+                "hold": {
+                    "secs": 30,
+                    "range": true,
+                    "hedge": false,
+                    "source": "spoken"
+                },
+                "rendered": 7,
+                "total": 7,
+                "fallback": false
+            },
+            "prose": "Stand where you can hold on to the back of a chair or a counter and bring a chair or stool behind you. Bring one leg up onto the chair and then stand as tall as possible, squeezing the hips forward and the bottom tight. Try and keep both knees in line with each other as you stand in order to stretch the front of the thigh or the quad muscle. Repeat this motion on the other side, bringing the leg up behind you, then standing tall and pulling the hips forward, the bottom in. Both legs should be even with each other. In order to increase the stretch, squeeze the bottom more forward and stand up even taller through the lower back. Hold for at least 30 seconds upwards to 2 minutes."
+        },
+        {
+            "title": "Tandem-stance balance",
+            "route": {
+                "stations": [
+                    {
+                        "kind": "setup",
+                        "channel": "seq",
+                        "text": "Standing next to a wall or a counter that you can hold on to, place one foot directly in front of the other, toe touching the heel.",
+                        "labelFull": "To start",
+                        "branch": [
+                            {
+                                "row": "cue",
+                                "kind": "cue",
+                                "text": "Try and maintain your balance in this position without holding on.",
+                                "pill": "Cue",
+                                "standing": false
+                            },
+                            {
+                                "row": "option",
+                                "kind": "progression",
+                                "text": "If you need more challenge, you can try closing your eyes in this position and holding again.",
+                                "pill": "Another option",
+                                "standing": false
+                            }
+                        ],
+                        "index": 0,
+                        "number": 1,
+                        "label": "To start",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "hold",
+                        "channel": "hold",
+                        "text": "Try and hold for up to 30 seconds.",
+                        "labelFull": "The hold",
+                        "branch": [
+                            {
+                                "row": "option",
+                                "kind": "progression",
+                                "text": "When you have completed one side, switch your foot position, bringing the other heel to toe, and repeat the exercise here, starting with your eyes open, and if you need increased challenge, closing the eyes, trying to maintain your balance.",
+                                "pill": "Another option",
+                                "standing": false
+                            }
+                        ],
+                        "index": 1,
+                        "number": 2,
+                        "label": "The hold",
+                        "finish": false,
+                        "hold": {
+                            "secs": 30,
+                            "range": false,
+                            "hedge": false,
+                            "source": "spoken"
+                        }
+                    }
+                ],
+                "lead": [],
+                "leadHeading": "Before you start",
+                "localeUsed": "en",
+                "locale": "en",
+                "doseLine": "",
+                "meta": [
+                    "2 stations",
+                    "30s hold"
+                ],
+                "hold": {
+                    "secs": 30,
+                    "range": false,
+                    "hedge": false,
+                    "source": "spoken"
+                },
+                "rendered": 5,
+                "total": 5,
+                "fallback": false
+            },
+            "prose": "Standing next to a wall or a counter that you can hold on to, place one foot directly in front of the other, toe touching the heel. Try and maintain your balance in this position without holding on. If you need more challenge, you can try closing your eyes in this position and holding again. Try and hold for up to 30 seconds. When you have completed one side, switch your foot position, bringing the other heel to toe, and repeat the exercise here, starting with your eyes open, and if you need increased challenge, closing the eyes, trying to maintain your balance."
+        },
+        {
+            "title": "Core work and stretches with the strap",
+            "route": {
+                "classLength": true,
+                "stations": [],
+                "lead": [],
+                "leadHeading": "Before you start",
+                "localeUsed": null,
+                "locale": "en",
+                "doseLine": "",
+                "meta": [],
+                "hold": null,
+                "rendered": 0,
+                "total": 0,
+                "fallback": false
+            },
+            "prose": "Start lying on your back with your Rangemaster strap in your hand and place it behind your knees. Hold on to the strap with your arms in one of the loops, which is probably more comfortable, so that your hands can relax. We're going to start with some core work here, so on your exhale, drop your belly down towards the floor and press your legs into the strap. Exhaling to press away, on the inhale, you're going to bring your knees back up towards your chest. Exhale, pressing away. Inhaling, bringing your knees back towards you. Be sure that your neck and shoulders stay relaxed throughout the exercise. Exhale again to drop the belly and press the legs away, trying to keep the legs in the same plane all the time. And exhale away again, dropping that low belly down. Good. Holding that position, we're going to transition to upper ab curls. So exhaling, rolling the head up. Inhaling, slowly back down. Exhale, rolling upward. Inhale, rolling down. You should try and keep the pelvis very steady during this exercise, so the tailbone should not be curling up. Your neck and shoulders should stay relaxed and the elbows planted on the ground in order to give you a little bit of stability here. Again, it's exhaling, rolling up. Inhaling, rolling back down. Exhaling to roll up. Inhaling, rolling down. Our next transition is to put the Rangemaster strap on your feet. You can place your feet inside two separate loops. And then again going into the tabletop position. Hold onto the strap. And we're going to work on the upper ab curl the same way as before. Exhaling up. And inhaling back down. Exhaling up. Inhaling back down. All the while keeping the same stability in the spine. The legs should also stay steady. Last one up. And inhaling back down. The next transition is going to be extending the legs up. So you may need to slide your hands down into a lower loop on the Rangemaster strap. You're going to exhale, extending the legs up. Inhaling, bringing them down. You should not feel any strain on your low back here. As you exhale, you're going to use a little bit of a turn out with your feet. Squeezing the heels together. Dropping the belly as you go up. Inhaling to bend the knees. For this exercise, the back should be flat on the floor the whole time. Especially as you extend the legs upward. Exhaling up. Inhaling back down. Then we're adding the upper ab curl. Exhaling up. Inhaling back down. Exhaling up. Inhale. Coming back down. Same as before, you want to keep the neck and shoulders relaxed. On this one, however, you may use the elbows to bend and help you on your way up of that upper ab curl. Again, you should feel no strain for any of this. Now we're going to pulse the legs towards you. Keeping them straight. Pulsing up towards your nose. Keeping the back flat. The low belly pulls in and that's what activates the muscles to pull the legs towards you. From here, we're going to transition into a hamstring stretch. So we'll put the strap on one foot only. You can place the foot in the loop and the strap towards the mid foot. Hold on to the strap with both hands and try and straighten the knee as much as you can. Try and relax the arms once you get into the proper stretch so that you're not feeling tension in the upper body. As much as you can, you want to pull the hip down towards the floor. If that's enough stretch for you, stay there. If you would like to increase the stretch, slide the other leg out straight. Be sure that both sides of your low back are still on the floor. To get a calf stretch or to get a bit of a neural glide, we're going to put the strap on the ball of the foot. For the neural glide, you're going to hold in the hamstring stretch, pointing and flexing the foot as you go. Trying to keep the legs steady in space and a bit of the stretch on the hamstring the whole time. To increase the calf stretch, you're just going to hold, pulling the toes towards you. We then transition to a TFL stretch or a lateral leg stretch by taking the leg across the body. You can sickle the foot a little bit as well and that will increase the stretch in the lower leg. Hold that position until you feel a good stretch and then we're going to switch sides. So you'll take the strap in the opposite hand, take it to the outside of the body to get an inner thigh stretch. Be sure that your opposite side hip stays down on the floor the whole time. You can also pull the leg further up towards your head to increase the stretch. Again, we're trying to keep the pelvis level. Bring the leg back up to midline and then we can bend the knee and switch sides. So take the one foot out and place the other in its place. Starting with the hamstring stretch with the strap in the mid foot. Squaring the pelvis and making sure that both sides of your low back stay flat on the ground the whole time. To get an increased stretch slide the leg out that's not being stretched along the floor and hold that position as well. Again, be sure that the pelvis stays level. You can then move the strap towards the ball of the foot as we did previously with the other side. Holding on and you can do the leg pumps and the calf stretch and then move over to stretch the lateral leg and the TFL. So taking the leg across the body, holding it there and then taking the leg out to the other side, getting the inner thigh stretch. Hold it a comfortable place there for that stretch as well. If you need to, you can bring the leg up closer to your head for more inner thigh stretch. Bring the leg back up to the midline for our next transition. We're going to take the foot out of the band and place it down. Take your strap and bring it behind your thigh, behind your knee again. And we're going to cross over the opposite leg. You'll use the strap to help you pick up the leg that has the band on it. The other leg you're going to cross the ankle over the knee and try and press the leg open to get a hip rotator stretch. The stretch should be felt in the leg that is crossed. And then we're going to switch sides so you can thread the strap behind the other leg. Hold on to it and cross over the free leg. Angle across the knee, then pick up the thigh with the strap. Holding there and you can press your elbow into the knee to create a little bit more of a stretch in that hip rotator. We want to hold our stretches at least 30 seconds on each side. Transitioning again, we're going to go back to another core exercise. Take your strap and we're going to place it behind your head. Hold on to the strap gently. You may want to thread your hands into one of the loops. And you're going to bring your feet to the floor. Exhale and roll up into an upper ab curl. Now here you want to be sure that you're using your abdominal muscles to roll the head up. And not pulling the head with the strap. The strap just assists taking some of the weight of the head to make the upper ab curl easier. You also want to be sure that your tailbone stays planted on the floor. If you'd like to increase the difficulty, you can bring your legs up to the tabletop position while you do this exercise. Again, you want your tailbone down on the floor. And remember, you're not pulling your head. You're using your rib cage to tighten and help lift up the head. The strap is there just as an assist, not as a pulling tool. This exercise should feel really good and will be most effective if you have a sore neck or tend to overuse your upper muscles while trying to lift your head. Our next transition is quite a big transition. We're going to move on to stretch the quad. So sitting up, place your foot inside one of the loops of the strap. Make sure the strap is long enough that you can hold it with your leg extended. You're going to roll over onto your stomach and pull that leg up into a stretch. A bent knee stretch heel towards your bottom. This should give you a stretch in the front of the thigh and through the quad muscle. Hold here again for about 30 seconds. Remember, you should not feel any strain in the neck or shoulders while doing this. Switching to the other side, same thing. Place the foot in the loop, leaving a long end towards you. Roll over onto your stomach and pull into the quad stretch position. Try and relax and let your body kind of melt into this stretch. Holding again about 30 seconds. The last big transition here, we're going to shift entirely into a standing position. While standing, take the strap in one hand and let it hang behind your back on one side. Grab it from behind and bring the other arm up towards your head. The elbow should be pointed at the sky. With the free hand behind you, you're going to press the strap down towards the floor and you should feel a stretch in your tricep muscle. Make sure that your posture is upright and that you're not arching your back in order to make that happen. Switching sides, take the strap behind you. Let it hang there and grab it with your free hand. Bring the elbow up pointing towards the sky and then pull down with the other hand to get a stretch in the tricep muscle. Last stretch here is an upper trap stretch. Also could be a first rib mobilization exercise. You'll take the strap and place it over the side you would like to stretch. Right close to the neck. You're going to take it behind you and under your armpit on the other side. Rest your hands into the strap and pull downwards towards the floor. Then tilt your head away from the strap. Again, holding about 30 seconds for this stretch. Then we'll switch sides. Just switch the strap over to the other shoulder. Thread it underneath the arm on the opposite side and slide your hands into the loops to pull downward towards the floor. Tilt the head away from the strap in order to feel the stretch in the upper trapezius on that side. Hold for about 30 seconds and then release the head and the pressure from the strap."
+        },
+        {
+            "title": "Neck isometrics (flexion)",
+            "route": {
+                "stations": [
+                    {
+                        "kind": "setup",
+                        "channel": "seq",
+                        "text": "While seated, take two fingers and place them on the forehead.",
+                        "labelFull": "To start",
+                        "branch": [],
+                        "index": 0,
+                        "number": 1,
+                        "label": "To start",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "Lower the eyes and look downward as if trying to flex the head.",
+                        "labelFull": "The movement",
+                        "branch": [],
+                        "index": 1,
+                        "number": 2,
+                        "label": "The movement",
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "Prevent the motion with the finger.",
+                        "labelFull": "The movement",
+                        "branch": [],
+                        "index": 2,
+                        "number": 3,
+                        "label": null,
+                        "finish": false,
+                        "hold": null
+                    },
+                    {
+                        "kind": "execution",
+                        "channel": "seq",
+                        "text": "Hold about three seconds.",
+                        "labelFull": "The movement",
+                        "branch": [],
+                        "index": 3,
+                        "number": 4,
+                        "label": null,
+                        "finish": false,
+                        "hold": null
+                    }
+                ],
+                "lead": [],
+                "leadHeading": "Before you start",
+                "localeUsed": "en",
+                "locale": "en",
+                "doseLine": "",
+                "meta": [
+                    "4 stations"
+                ],
+                "hold": null,
+                "rendered": 4,
+                "total": 4,
+                "fallback": false
+            },
+            "prose": "While seated, take two fingers and place them on the forehead. Lower the eyes and look downward as if trying to flex the head. Prevent the motion with the finger. Hold about three seconds."
+        },
+        {
+            "title": "Forearm stretch, wrist flexed",
+            "route": {
+                "stations": [
+                    {
+                        "kind": "hold",
+                        "channel": "hold",
+                        "text": "In a seated or standing position, extend one arm out, press the palm of the hand back towards the forearm and hold that position for at least 30 seconds up towards 1 minute, trying to feel a stretch through the top of the forearm and hand.",
+                        "labelFull": "The hold",
+                        "branch": [],
+                        "index": 0,
+                        "number": 1,
+                        "label": "The hold",
+                        "finish": false,
+                        "hold": {
+                            "secs": 30,
+                            "range": true,
+                            "hedge": false,
+                            "source": "spoken"
+                        }
+                    }
+                ],
+                "lead": [],
+                "leadHeading": "Before you start",
+                "localeUsed": "en",
+                "locale": "en",
+                "doseLine": "",
+                "meta": [
+                    "1 station",
+                    "30s minimum hold"
+                ],
+                "hold": {
+                    "secs": 30,
+                    "range": true,
+                    "hedge": false,
+                    "source": "spoken"
+                },
+                "rendered": 1,
+                "total": 1,
+                "fallback": false
+            },
+            "prose": "In a seated or standing position, extend one arm out, press the palm of the hand back towards the forearm and hold that position for at least 30 seconds up towards 1 minute, trying to feel a stretch through the top of the forearm and hand."
+        }
+    ],
+    "i18n": {
+        "eyebrowRehab": "Home programme",
+        "labelSetup": "To start",
+        "labelExecution": "The movement",
+        "labelBreath": "Breathing",
+        "labelRepeat": "Repeat",
+        "labelFinish": "To finish",
+        "labelHold": "The hold",
+        "pillCue": "Cue",
+        "pillCaution": "Careful",
+        "cautionStanding": "throughout the exercise",
+        "optionAnother": "Another option",
+        "optionHarder": "To make it harder",
+        "optionAssist": "If you need help",
+        "optionInfo": "Good to know",
+        "leadInHeading": "Before you start",
+        "metaStations": "{0} stations",
+        "metaStationSingular": "1 station",
+        "metaHold": "{0}s hold",
+        "metaHoldMinimum": "{0}s minimum hold",
+        "metaLeadIn": "a lead-in",
+        "doseSetsOfReps": "{0} sets of {1}",
+        "doseSets": "{0} sets",
+        "doseReps": "{0} reps",
+        "doseHold": "Hold {0} seconds",
+        "nextStation": "Next station",
+        "showAllStations": "Show all stations",
+        "showOneStation": "Show this station only",
+        "routeFinished": "Route finished",
+        "back": "Back",
+        "position": "Station {0} of {1}",
+        "foldSingular": "Show the 1 station already done",
+        "foldPlural": "Show the {0} stations already done",
+        "stationsNavLabel": "Stations",
+        "indexRowLabel": "Station {0} of {1}, {2}",
+        "indexHasCaution": "has a caution",
+        "routeAriaLabel": "How to do it, station by station",
+        "holdHolding": "Holding",
+        "holdPaused": "Paused",
+        "holdCopyPlain": "{0} seconds.",
+        "holdCopyRange": "At least {0} seconds.",
+        "holdCopyHedge": "About {0} seconds.",
+        "holdCopyPrescribed": "{0} seconds, as prescribed.",
+        "holdReached": "{0} seconds reached.",
+        "holdReachedRange": "{0} seconds reached.",
+        "holdReady": "Ready when you are",
+        "holdStart": "Start hold",
+        "holdPause": "Pause",
+        "holdResume": "Resume",
+        "holdReset": "Reset",
+        "holdCancel": "Cancel",
+        "holdLead": "Get into position",
+        "holdSecs": "sec"
+    }
+}

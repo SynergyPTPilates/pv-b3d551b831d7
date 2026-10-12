@@ -1,0 +1,576 @@
+.hp-wrap {
+  --hp-brand: #125c65;
+  --hp-brand-dark: #0b3f46;
+  --hp-brand-wash: #e4f0f0;
+  --hp-ink: #16232b;
+  --hp-ink-soft: #54626e;
+  --hp-ink-faint: #8a95a0;
+  --hp-hairline: #e2e9ea;
+  --hp-surface: #ffffff;
+  --hp-ground: #f6f9f9;
+  --hp-done: #1a8a5e;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 20px 48px;
+  color: var(--hp-ink);
+}
+.hp-hidden { display: none !important; }
+
+.hp-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.hp-title {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-size: clamp(20px, 3.4vw, 26px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 5px;
+}
+.hp-meta {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 13px; color: var(--hp-ink-soft); margin: 0;
+}
+.hp-meta .hp-sep { color: var(--hp-ink-faint); }
+
+.hp-head-right { display: flex; align-items: center; gap: 14px; }
+
+.hp-ring { position: relative; width: 62px; height: 62px; flex: 0 0 auto; }
+.hp-ring svg { transform: rotate(-90deg); display: block; }
+.hp-ring-label {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 14px; font-weight: 800; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.hp-ring-label small {
+  font-size: 8.5px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--hp-ink-faint); margin-top: 3px;
+  /* One word, never wrapped: a caption too long for the ring is scaled down
+     by ringCaptionStyle() in the view, not broken across lines. */
+  white-space: nowrap;
+}
+
+.hp-btn {
+  font-size: 13px; font-weight: 600;
+  border-radius: 10px; padding: 9px 16px;
+  border: 1px solid transparent; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+  text-decoration: none;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.hp-btn-primary { background: var(--hp-brand); color: #fff; }
+.hp-btn-primary:hover { background: var(--hp-brand-dark); color: #fff; }
+.hp-btn-ghost { background: var(--hp-surface); color: var(--hp-ink-soft); border-color: var(--hp-hairline); }
+.hp-btn-ghost:hover { border-color: var(--hp-brand); color: var(--hp-brand); }
+
+.hp-switcher { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 16px; }
+.hp-pill {
+  font-size: 12.5px; font-weight: 600;
+  padding: 7px 14px; border-radius: 999px;
+  border: 1px solid var(--hp-hairline); background: var(--hp-surface);
+  color: var(--hp-ink-soft); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: border-color .12s ease, color .12s ease, background .12s ease;
+}
+.hp-pill:hover { border-color: var(--hp-brand); color: var(--hp-brand); }
+.hp-pill[aria-pressed="true"] { background: var(--hp-brand); border-color: var(--hp-brand); color: #fff; }
+.hp-pill-count { font-size: 11px; opacity: .72; font-variant-numeric: tabular-nums; }
+
+.hp-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 1fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 4px;
+}
+
+.hp-player {
+  background: var(--hp-surface);
+  border: 1px solid var(--hp-hairline);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(18,92,101,.05);
+  overflow: hidden;
+}
+.hp-stage { position: relative; background: #0b1f22; }
+.hp-video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #0b1f22; }
+
+/* ---------------------------------------------------------------------------
+   Subtitles, part 1 of 2: the FULLSCREEN fallback.
+
+   Inline, the cues are not painted at all - the <track> is held at
+   mode="hidden" and video-captions.js writes each active cue into the strip
+   below the player (part 2, .vc-strip). Nothing here applies then.
+
+   It applies in fullscreen, and only there. On iOS Safari and on Android the
+   OS takes the video over with its own player: that player renders ::cue and
+   cannot see a <div> elsewhere in the document, so without these rules the
+   client would see no captions for the whole time the phone is propped up -
+   which is when they most need them. The script flips the track back to
+   "showing" on the way in and to "hidden" on the way out; these rules are what
+   it is handing the cues over to. They also cover the viewer who turns
+   captions on from the browser's own CC menu, which the script yields to.
+
+   A browser's default cue is white text with a black box in its own font,
+   sized at 5% of the video's height - on a phone that is 11px over a 219px-
+   tall player, which nobody reads from a mat. This sets:
+
+   - white DM Sans on a translucent box in the stage's own dark teal, so the
+     caption reads as part of the player rather than a stuck-on label. Teal
+     is kept to the BOX: the brand teal (#125c65) as a text colour on video is
+     under 4.5:1 against most frames and fails the contrast it would need, so
+     the only coloured thing is the backdrop, and the text stays white;
+   - a size that holds at phone width (16px) and grows on a wide player
+     (19px), with a text shadow for the frames where the box is over something
+     pale. The small staff previews (a 288px library card) get 13px and the
+     builder's modal 16px, because a browser DRAWS NOTHING for a cue that does
+     not fit inside the video box - no clipping, no error - and the loader's
+     80-character cap (VideoSubtitleService::MAX_CUE_CHARS) is sized against
+     the strip, which is stricter than these;
+   - no motion. Cues appear and disappear; nothing slides or fades, which is
+     also why the reduced-motion rule below has nothing to switch off and
+     exists to say so rather than to do anything.
+
+   ::cue accepts a restricted set of properties (colour, background, font,
+   text-shadow, white-space, outline, opacity, visibility, line-height) and
+   silently drops the rest - no padding, no border-radius, no margin - so the
+   box is shaped by line-height and the font alone. */
+.hp-video::cue,
+#videoPoster::cue,
+.routine-card video::cue,
+.card-body video::cue {
+  color: #ffffff;
+  background-color: rgba(11, 31, 34, 0.82);
+  font-family: 'DM Sans', 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  white-space: pre-line;
+}
+.routine-card video::cue,
+.card-body video::cue {
+  font-size: 13px;
+}
+@media (min-width: 900px) {
+  .hp-video::cue {
+    font-size: 19px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hp-video::cue,
+  #videoPoster::cue,
+  .routine-card video::cue,
+  .card-body video::cue {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Subtitles, part 2 of 2: the strip BELOW the player. The one the client
+   actually reads.
+
+   Why below and not over: these clips demonstrate a body moving, and a cue
+   painted inside the video box sits over the lower third - the feet, the
+   hands, the end of the spine. Below the player it occludes nothing, and it
+   gets real CSS rather than ::cue's eight-property subset.
+
+   The look is the owner's choice of 2026-10-05 (#910, mockups in the
+   media-pipeline notes, "final-a"): a light, inset, rounded box - the same
+   14px radius as the viewer's buttons, inside the card's 16px - with the text
+   centred and NO language pill. The language now lives on the subtitles chip
+   on the video (.hp-cc), which is also what turns the strip off; a strip that
+   is off is removed, not left as an empty tinted row.
+
+   LAYOUT JUMP. Between cues there is no text at all, and a strip that sized
+   itself to its content would bounce the exercise name and the Done button
+   under the player for the length of the clip. The text box reserves exactly
+   two lines and holds them through the silences. The loader splits every cue
+   to VideoSubtitleService::MAX_CUE_CHARS (70), which is what two lines hold
+   at 14px in a 390px phone's strip - measured on the harness; at 150 the long
+   cues needed three lines, and at 80 some still did. */
+.vc-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 10px 0;
+  padding: 9px 12px;
+  background: var(--hp-ground, #f6f9f9);
+  border: 1px solid var(--hp-hairline, #e2e9ea);
+  border-radius: 14px;
+}
+.vc-strip[hidden] { display: none; }
+.vc-strip-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-family: 'DM Sans', 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  /* Two lines reserved, always - see LAYOUT JUMP above. */
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--hp-ink, #16232b);
+  white-space: pre-line;
+  overflow-wrap: break-word;
+}
+@media (min-width: 900px) {
+  .vc-strip { margin: 14px 16px 0; padding: 11px 24px; }
+  .vc-strip-text { font-size: 16px; line-height: 22px; min-height: 44px; }
+}
+/* The staff previews (library cards, builder and notes modals): the same box,
+   smaller, one line reserved - staff are checking a subtitle exists and reads
+   correctly, not following along. */
+.vc-strip-compact {
+  margin: 8px 8px 0;
+  padding: 7px 10px;
+  border-radius: 10px;
+  /* The library cards put the <video> in a flex ROW (.card-body.d-flex), so
+     without these the strip sat beside the player as a narrow column. It
+     never showed while the default-track bug kept it hidden. */
+  flex: 0 0 calc(100% - 16px);
+  box-sizing: border-box;
+}
+.d-flex:has(> .vc-strip-compact) { flex-wrap: wrap; }
+.vc-strip-compact .vc-strip-text {
+  font-size: 13px;
+  line-height: 18px;
+  min-height: 18px;
+}
+
+/* ---------------------------------------------------------------------------
+   The subtitles chip, top right of the video, mirroring the "1 OF 3" stamp
+   opposite it. Our own control rather than the native player's CC button:
+   that one is buried in an overflow menu on Chrome for Android and absent
+   from iOS's inline player. Fades while the clip plays, like the native
+   controls, and comes back on any touch or movement over the video
+   (home-program.js wakeChip), on pause, and while focused. */
+.hp-cc {
+  position: absolute; right: 14px; top: 13px;
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 32px; padding: 0 10px 0 9px;
+  border: 0; border-radius: 999px;
+  background: rgba(0, 0, 0, .4); color: #fff;
+  font-family: 'DM Sans', 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-size: 12px; font-weight: 600; letter-spacing: .03em;
+  cursor: pointer;
+  transition: opacity .2s ease;
+}
+.hp-cc[hidden] { display: none; }
+.hp-cc:hover, .hp-cc[aria-expanded="true"] { background: rgba(0, 0, 0, .6); }
+.hp-cc:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.hp-cc.is-off { color: rgba(255, 255, 255, .85); }
+.hp-cc-chev { opacity: .8; }
+.hp-cc-long { display: none; }
+@media (min-width: 600px) {
+  .hp-cc-short { display: none; }
+  .hp-cc-long { display: inline; }
+}
+.hp-stage.is-playing:not(.is-awake):not(.is-menu) .hp-cc:not(:focus-visible) {
+  opacity: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hp-cc { transition: none; }
+}
+
+/* Its menu. A popover under the chip from 600px; a bottom sheet on a phone,
+   where a popover over a 219px-tall player has nowhere to go. */
+.hp-cc-menu {
+  position: absolute; right: 12px; top: 52px; z-index: 5;
+  width: 260px;
+  background: var(--hp-surface, #fff); color: var(--hp-ink, #16232b);
+  border: 1px solid var(--hp-hairline, #e2e9ea); border-radius: 16px;
+  box-shadow: 0 14px 40px rgba(11, 31, 34, .2);
+  padding: 8px 14px 10px;
+}
+.hp-cc-menu[hidden] { display: none; }
+.hp-cc-menu-head { display: flex; align-items: center; justify-content: space-between; min-height: 40px; }
+.hp-cc-menu-title {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 15px; font-weight: 700; color: var(--hp-ink, #16232b);
+}
+.hp-cc-close {
+  display: grid; place-items: center; width: 32px; height: 32px;
+  border: 0; border-radius: 50%; background: var(--hp-ground, #f6f9f9); color: var(--hp-ink, #16232b);
+  cursor: pointer;
+}
+.hp-cc-opt {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  min-height: 46px; padding: 6px 2px;
+  border: 0; border-bottom: 1px solid #eef3f3; background: none;
+  font-family: 'DM Sans', 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-size: 15px; font-weight: 500; color: var(--hp-ink, #16232b); text-align: left;
+  cursor: pointer;
+}
+.hp-cc-opt:last-child { border-bottom: 0; }
+.hp-cc-opt::before {
+  content: ""; flex: none; width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid #5f8a91; background: #fff;
+}
+.hp-cc-opt[aria-checked="true"] { font-weight: 700; }
+.hp-cc-opt[aria-checked="true"]::before {
+  border-color: var(--hp-brand, #125c65);
+  background: var(--hp-brand, #125c65) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m6 12.5 4 4L18 8' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat;
+}
+.hp-cc-opt:focus-visible { outline: 2px solid var(--hp-brand, #125c65); outline-offset: 2px; border-radius: 8px; }
+@media (max-width: 599px) {
+  .hp-cc-menu {
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto; width: auto;
+    border-radius: 22px 22px 0 0; border-bottom: 0;
+    padding: 10px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    /* The second shadow is the backdrop: it dims the page behind the sheet
+       without another element, and a tap on it lands on the document and
+       closes the sheet (home-program.js). */
+    box-shadow: 0 -8px 30px rgba(11, 31, 34, .25), 0 0 0 100vmax rgba(11, 31, 34, .45);
+    z-index: 1060;
+  }
+  .hp-cc-opt { min-height: 52px; font-size: 16px; }
+}
+/* Adherence panel on the client's Routines tab. Quiet on purpose: it sits
+   above the routines a physio is about to edit and has two seconds of their
+   attention. `.is-done` and `.is-watched` are deliberately different weights,
+   not different hues of the same thing - one is the client saying they did the
+   exercise, the other is only that the video played. */
+.sx-adherence {
+  border: 1px solid #e2e9ea; border-radius: 12px; background: #fbfdfd;
+  padding: 16px 18px; margin-bottom: 4px;
+}
+.sx-adherence-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 18px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.sx-adherence-title { font-size: 16px; font-weight: 700; color: #16232b; margin: 0; }
+.sx-adherence-window {
+  font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: #8a95a0;
+}
+.sx-adherence-figures { display: flex; gap: 22px; }
+.sx-figure { display: flex; align-items: baseline; gap: 7px; }
+.sx-figure-n { font-size: 24px; font-weight: 700; color: #125c65; line-height: 1; font-variant-numeric: tabular-nums; }
+.sx-figure-l { font-size: 12px; color: #54626e; border-bottom: 1px dotted #b9c4c6; cursor: help; }
+.sx-figure-soft .sx-figure-n { color: #8a95a0; font-weight: 600; font-size: 20px; }
+.sx-adherence-strip { display: flex; gap: 3px; flex-wrap: wrap; }
+/* Scoped to the adherence strip: `.sx-day` is also the staff profile's day
+   chip further down this file, and an unscoped `height: 12px` squashed it. */
+.sx-adherence-strip .sx-day {
+  width: 12px; height: 12px; border-radius: 3px;
+  background: #eef2f2; border: 1px solid #e2e9ea; flex: 0 0 auto;
+}
+.sx-adherence-strip .sx-day.is-done { background: #1a8a5e; border-color: #1a8a5e; }
+.sx-adherence-strip .sx-day.is-watched { background: #cfe3dc; border-color: #b9d5cb; }
+.sx-adherence-foot { font-size: 12.5px; color: #54626e; margin: 12px 0 0; }
+.sx-adherence-foot b { color: #16232b; }
+.sx-adherence-empty { font-size: 13px; color: #54626e; margin: 0; max-width: 62ch; }
+.sx-routine-stat { font-size: 11.5px; color: #1a8a5e; font-weight: 600; margin-top: 2px; }
+
+/* Stands in for a staff-side player whose file is gone - see
+   videoUnavailableFallback() in custom_helper.php. Sized like the players it
+   replaces so the card does not collapse. */
+.video-unavailable {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  width: 100%; min-height: 200px; margin: 0; padding: 0 20px;
+  background: #f5f6f7; border: 1px dashed #c9ced3; border-radius: 6px;
+  color: #5a6169; font-size: 14px; line-height: 1.5;
+}
+.hp-video-gone {
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  width: 100%; aspect-ratio: 16 / 9; margin: 0; padding: 0 24px;
+  background: #0b1f22; color: #e6eced; font-size: 15px; line-height: 1.5;
+}
+.hp-stamp {
+  position: absolute; left: 14px; top: 13px;
+  font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+  color: #fff; background: rgba(0,0,0,.4); padding: 4px 9px; border-radius: 999px;
+  font-variant-numeric: tabular-nums; pointer-events: none;
+}
+.hp-player-body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 13px; }
+.hp-ex-name {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 19px; font-weight: 700; letter-spacing: -.015em; margin: 0;
+}
+/* The therapist's note. This was a panel with a teal left rule and an
+   uppercase brand-coloured eyebrow - the bordered callout card retired from
+   the Synergy site in da7391e, for the reason that applies here too: a
+   sentence does not need a container to be read, and the rule was doing
+   decoration rather than work. What is left is a labelled paragraph. The
+   label stays, unlike on mobile, because this one repeats under every
+   exercise in the programme and without it reads as guidance for the exercise
+   on screen rather than for the whole routine. */
+.hp-cue {
+  margin: 0;
+  font-size: 13.5px; line-height: 1.6; color: var(--hp-ink-soft);
+}
+.hp-cue b {
+  display: block;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 12px; font-weight: 700;
+  color: var(--hp-ink); margin-bottom: 2px;
+}
+.hp-dose {
+  align-self: flex-start; margin: 0;
+  font-size: 12.5px; font-weight: 500;
+  color: var(--hp-brand); background: var(--hp-brand-wash);
+  border-radius: 7px; padding: 7px 10px;
+  font-variant-numeric: tabular-nums;
+}
+/* The written how-to, collapsed so it never competes with the video - for
+   someone in a quiet room, on a metered connection, or who reads faster than
+   they watch. It describes the movement, so it comes from the library video
+   rather than the assignment (§3.3) and is not the therapist's per-client note
+   above it. */
+.hp-how { border-top: 1px solid var(--hp-hairline); padding-top: 11px; }
+.hp-how > summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 600; color: var(--hp-brand);
+}
+.hp-how > summary::-webkit-details-marker { display: none; }
+.hp-how > summary:focus-visible { outline: 2px solid var(--hp-brand); outline-offset: 3px; }
+.hp-how > summary .hp-chev { flex: 0 0 auto; transition: transform .18s ease; }
+.hp-how[open] > summary .hp-chev { transform: rotate(90deg); }
+.hp-how-text {
+  margin-top: 9px; font-size: 13.5px; line-height: 1.65; color: var(--hp-ink-soft);
+  /* Free text, usually authored one step to a line. Keep those breaks without
+     letting the source decide where the column wraps. */
+  white-space: pre-line;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hp-how > summary .hp-chev { transition: none; }
+}
+
+/* The client's session count. Accumulating and never resetting - see
+   docs/HOME-PROGRAMME-REBUILD.md 3.5 for why this is not a streak. Quiet by
+   design: it sits under the head as a line of text rather than a scoreboard,
+   because it is there to be noticed by someone who wants it and not to be the
+   loudest thing on a rehab patient's screen. */
+.hp-streak {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px;
+  margin: 10px 0 0; padding: 0;
+  font-size: 13px; line-height: 1.5; color: var(--hp-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.hp-streak-total { font-weight: 700; color: var(--hp-ink); }
+.hp-streak-recent:not(:empty)::before {
+  content: "\00b7"; margin-right: 10px; color: var(--hp-ink-faint);
+}
+.hp-streak[hidden] { display: none; }
+
+.hp-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hp-spacer { flex: 1 1 auto; }
+.hp-step {
+  width: 34px; height: 34px; border-radius: 9px;
+  border: 1px solid var(--hp-hairline); background: var(--hp-surface);
+  color: var(--hp-ink-soft); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.hp-step:hover:not(:disabled) { border-color: var(--hp-brand); color: var(--hp-brand); }
+.hp-step:disabled { opacity: .35; cursor: default; }
+
+.hp-list-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; margin: 0 2px 10px;
+}
+.hp-list-head h2 {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--hp-ink-faint); margin: 0;
+}
+.hp-tally { font-size: 12px; font-weight: 600; color: var(--hp-done); font-variant-numeric: tabular-nums; }
+
+.hp-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.hp-row {
+  display: grid;
+  grid-template-columns: 20px 62px minmax(0, 1fr) 28px;
+  align-items: center; gap: 11px;
+  width: 100%; padding: 9px 11px 9px 9px;
+  background: var(--hp-surface);
+  border: 1px solid var(--hp-hairline);
+  border-radius: 13px;
+  cursor: pointer; text-align: left;
+  transition: border-color .12s ease, background .12s ease;
+}
+.hp-row:hover { border-color: var(--hp-brand); }
+.hp-row[aria-current="true"] { border-color: var(--hp-brand); background: var(--hp-brand-wash); }
+.hp-row.saving { opacity: .6; pointer-events: none; }
+.hp-num {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 12.5px; font-weight: 700; text-align: center;
+  color: var(--hp-ink-faint); font-variant-numeric: tabular-nums;
+}
+.hp-row[aria-current="true"] .hp-num { color: var(--hp-brand); }
+.hp-thumb {
+  position: relative; aspect-ratio: 16 / 10; border-radius: 8px; overflow: hidden;
+  background-color: var(--hp-brand-dark);
+  background-size: cover; background-position: center;
+}
+.hp-thumb .hp-clock {
+  position: absolute; right: 4px; bottom: 3px;
+  font-style: normal; font-size: 9px; font-weight: 600; color: #fff;
+  background: rgba(0,0,0,.5); padding: 1px 4px; border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.hp-copy { min-width: 0; }
+.hp-ex-title {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 13.5px; font-weight: 700; line-height: 1.3;
+  overflow-wrap: break-word; display: block;
+}
+.hp-row.done .hp-ex-title { color: var(--hp-ink-soft); }
+/* Dosage, in the rail and under the player. Sets, reps, hold and frequency
+   exist nowhere in the schema yet (docs/HOME-PROGRAMME-REBUILD.md §3.4), so
+   neither renders today - home-program.js hides them while the field is
+   absent. Tabular figures because it is a prescription and should read like
+   one, and because the numbers change between exercises. */
+.hp-dose-row {
+  display: block; margin-top: 3px;
+  font-size: 11.5px; line-height: 1.35; color: var(--hp-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.hp-row.done .hp-dose-row { color: var(--hp-ink-faint); }
+.hp-tick {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1.5px solid var(--hp-hairline); background: var(--hp-surface);
+  display: flex; align-items: center; justify-content: center;
+  color: transparent; cursor: pointer;
+  transition: background .14s ease, border-color .14s ease, color .14s ease;
+}
+.hp-tick:hover { border-color: var(--hp-done); color: var(--hp-ink-faint); }
+.hp-row.done .hp-tick { background: var(--hp-done); border-color: var(--hp-done); color: #fff; }
+
+.hp-note, .hp-empty {
+  text-align: center; color: var(--hp-ink-faint);
+  font-size: 13.5px; padding: 40px 20px;
+}
+.hp-empty h2 {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 18px; font-weight: 700; color: var(--hp-ink); margin: 0 0 6px;
+}
+.hp-empty p { margin: 0; }
+
+.hp-btn:focus-visible,
+.hp-pill:focus-visible,
+.hp-row:focus-visible,
+.hp-step:focus-visible,
+.hp-tick:focus-visible {
+  outline: 2px solid var(--hp-brand);
+  outline-offset: 2px;
+}
+
+@media (max-width: 991px) {
+  .hp-split { grid-template-columns: minmax(0, 1fr); }
+  .hp-head-right { width: 100%; justify-content: space-between; }
+}
+@media (max-width: 480px) {
+  .hp-wrap { padding: 16px 12px 36px; }
+  .hp-row { grid-template-columns: 18px 54px minmax(0, 1fr) 26px; gap: 9px; }

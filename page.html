@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>#1115 desktop programme page: layout options</title>
+<!--
+  Mockup harness. hp.css is lines 3760-4335 of public/custom/css/custom.css at
+  052701e6 (the rig commit); route-viewer.css/.js are byte copies from the same
+  commit; routes.json is App\Services\RouteViewerService output over the walk
+  clips' real classified steps. The portal chrome (sidebar, header) is a
+  stand-in. Query params pick the variant: layout, root, cc, route.
+-->
+<link rel="stylesheet" href="assets/fonts/plus-jakarta-sans.css">
+<link rel="stylesheet" href="assets/fonts/dm-sans.css">
+<link rel="stylesheet" href="assets/hp.css">
+<link rel="stylesheet" href="assets/route-viewer.css">
+<style>
+  /* The theme's root size: style.bundle.css sets html { font-size: 12px !important }. */
+  html { font-size: 12px; }
+  html[data-root="14"] { font-size: 14px; }
+  html[data-root="16"] { font-size: 16px; }
+  body { margin: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #f3f6f6; }
+  * { box-sizing: border-box; }
+
+  /* ---- portal chrome stand-in ---- */
+  .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+  .app.nav-mini { grid-template-columns: 76px 1fr; }
+  .side { background: #0e3b41; color: #cfe3e4; padding: 12px; }
+  .brand { background: #fff; border-radius: 12px; height: 50px; display: flex; align-items: center; gap: 10px; padding: 0 14px; color: #125c65; font-weight: 800; font-size: 19px; }
+  .brand i { width: 30px; height: 30px; border-radius: 50%; background: #125c65; display: inline-block; flex: none; }
+  .nav { list-style: none; margin: 30px 0 0; padding: 0; font-size: 15px; }
+  .nav li { padding: 9px 10px; border-radius: 8px; display: flex; gap: 12px; align-items: center; }
+  .nav li::before { content: ""; width: 18px; height: 18px; border: 1.6px solid #9fc3c6; border-radius: 5px; flex: none; }
+  .nav li.on { background: rgba(255,255,255,.14); color: #fff; }
+  .nav-mini .brand span, .nav-mini .nav li span { display: none; }
+  .nav-mini .brand { justify-content: center; padding: 0; }
+  .nav-mini .nav li { justify-content: center; }
+  .top { display: flex; justify-content: space-between; align-items: center; padding: 14px 30px 10px; }
+  .top h1 { font-size: 19px; margin: 0; font-weight: 700; color: #16232b; }
+  .top small { font-size: 11px; color: #125c65; }
+  .who { display: flex; gap: 10px; align-items: center; font-size: 14px; color: #16232b; }
+  .who i { width: 40px; height: 40px; border-radius: 50%; background: #125c65; color: #fff; font-style: normal; display: grid; place-items: center; }
+  .card { background: #fff; margin: 0 14px 14px; border-radius: 12px; min-height: calc(100vh - 80px); }
+
+  /* ---- a video still stand-in (no media on this box) ---- */
+  .hp-video { background: radial-gradient(ellipse at 50% 70%, #2a4b50 0, #0b1f22 70%); position: relative; }
+  .fake-video { position: relative; }
+  .fake-video .figure { position: absolute; left: 22%; right: 22%; bottom: 22%; height: 16%; }
+  .fake-video .figure::before { content: ""; position: absolute; inset: 70% 0 0 0; background: #3d6a70; border-radius: 6px; }
+  .fake-video .figure::after { content: ""; position: absolute; left: 12%; width: 56%; top: 30%; height: 30%; background: #c9a98c; border-radius: 40px; transform: rotate(-3deg); }
+  .fake-video .ctrl { position: absolute; left: 0; right: 0; bottom: 0; height: 56px; background: linear-gradient(transparent, rgba(0,0,0,.6)); }
+  .fake-video .ctrl::before { content: "▶  0:00 / 1:12"; position: absolute; left: 18px; bottom: 22px; color: #fff; font: 600 13px system-ui; }
+  .fake-video .ctrl::after { content: ""; position: absolute; left: 16px; right: 16px; bottom: 12px; height: 3px; background: rgba(255,255,255,.35); border-radius: 2px; }
+  .vlabel { position: absolute; left: 50%; top: 40%; transform: translate(-50%,-50%); color: rgba(255,255,255,.35); font: 600 12px system-ui; letter-spacing: .12em; text-transform: uppercase; }
+
+  /* ---- layout variants ---- */
+  /* B, D: watch & read side by side */
+  [data-layout="side"] .hp-split, [data-layout="focus"] .hp-split { grid-template-columns: minmax(0, 1.75fr) minmax(330px, 1fr); }
+  [data-layout="side"] .col-route, [data-layout="focus"] .col-route { position: sticky; top: 12px; }
+  /* A: theatre */
+  [data-layout="theatre"] .hp-split { display: block; }
+  [data-layout="theatre"] .hp-video { max-height: 64vh; }
+  /* C: slim rail */
+  [data-layout="rail"] .hp-split { grid-template-columns: 84px minmax(0, 1fr); }
+
+  /* the filmstrip: the programme list as one row above the player */
+  .strip { display: flex; gap: 8px; margin: 2px 0 14px; overflow: hidden; }
+  .strip button { flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 6px; border: 1px solid var(--hp-hairline); background: #fff; border-radius: 12px; font: 600 12px/1.25 'Plus Jakarta Sans', sans-serif; color: var(--hp-ink); text-align: left; cursor: pointer; }
+  .strip button[aria-current="true"] { border-color: var(--hp-brand); background: var(--hp-brand-wash); }
+  .strip .th { width: 44px; height: 30px; border-radius: 6px; background: #0e3b41; flex: none; position: relative; }
+  .strip .n { position: absolute; left: 3px; top: 2px; color: #fff; font-size: 10px; font-weight: 800; }
+  .strip .t { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .strip .tk { width: 14px; height: 14px; border: 1.6px solid var(--hp-hairline); border-radius: 50%; flex: none; margin-left: auto; }
+  .strip button.done .tk { background: var(--hp-done); border-color: var(--hp-done); }
+
+  /* the rail */
+  .rail { display: flex; flex-direction: column; gap: 8px; }
+  .rail button { position: relative; height: 62px; border-radius: 12px; border: 1px solid var(--hp-hairline); background: #0e3b41; cursor: pointer; }
+  .rail button[aria-current="true"] { outline: 3px solid var(--hp-brand); outline-offset: 2px; }
+  .rail b { position: absolute; left: 6px; top: 4px; color: #fff; font: 800 12px 'Plus Jakarta Sans'; }
+  .rail .tk { position: absolute; right: 5px; bottom: 5px; width: 14px; height: 14px; border-radius: 50%; border: 1.6px solid rgba(255,255,255,.7); }
+  .rail-more { font: 600 11px 'Plus Jakarta Sans'; color: var(--hp-ink-soft); text-align: center; padding-top: 2px; }
+  .rail-tip { position: absolute; left: 76px; top: 8px; white-space: nowrap; background: #16232b; color: #fff; font: 600 12px 'Plus Jakarta Sans'; padding: 7px 10px; border-radius: 8px; z-index: 3; }
+
+  /* compact head for D */
+  .head-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .head-row .hp-title { margin: 0; font-size: 20px; }
+  .head-row .grow { flex: 1; }
+  .listbtn { display: inline-flex; gap: 8px; align-items: center; padding: 8px 12px; border: 1px solid var(--hp-hairline); border-radius: 10px; font: 600 13px 'Plus Jakarta Sans'; background: #fff; color: var(--hp-ink); }
+  .mini-ring { font: 800 13px 'Plus Jakarta Sans'; color: var(--hp-ink-soft); }
+
+  /* the route as a column: always open, no chevron */
+  .rv.always .rv-expand { display: none; }
+  .col-route .rv-frame { max-height: calc(100vh - 150px); }
+
+  /* ---- CC variants ---- */
+  [data-cc="compact"] .hp-cc-menu { width: 168px; padding: 6px; top: 50px; border-radius: 12px; }
+  [data-cc="compact"] .hp-cc-menu-head { display: none; }
+  [data-cc="compact"] .hp-cc-opt { min-height: 36px; padding: 6px 10px; font-size: 13px; border-radius: 8px; }
+  .cc-toggle { position: absolute; right: 12px; top: 12px; display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 999px; background: rgba(0,0,0,.45); color: #fff; font: 700 12px 'Plus Jakarta Sans'; border: 0; }
+  .cc-toggle .sw { width: 26px; height: 15px; border-radius: 9px; background: rgba(255,255,255,.35); position: relative; }
+  .cc-toggle .sw::after { content: ""; position: absolute; left: 2px; top: 2px; width: 11px; height: 11px; border-radius: 50%; background: #fff; }
+  .cc-toggle.on .sw { background: #3fb68b; } .cc-toggle.on .sw::after { left: 13px; }
+
+
+  /* ---- v2: focus with the playlist under the video (2026-10-12) ---- */
+  html[data-root="13"] { font-size: 13px; }
+  [data-layout="focus2"] .hp-wrap { max-width: 1600px !important; }
+  .f2 { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(340px, 1fr); grid-template-areas: "player route" "list route"; gap: 18px 22px; align-items: start; }
+  .f2 > .hp-player { grid-area: player; }
+  .f2 > .col-route { grid-area: route; position: sticky; top: 12px; }
+  .f2 > .plist { grid-area: list; min-width: 0; }
+  .f2 .hp-player-body { padding: 14px 4px 0; }
+  .plist-head { display: flex; align-items: baseline; gap: 10px; margin: 0 2px 10px; }
+  .plist-head h2 { margin: 0; font: 700 15px/1.2 'Plus Jakarta Sans'; color: var(--hp-ink); }
+  .plist-head span { font: 600 13px 'Plus Jakarta Sans'; color: var(--hp-ink-soft); }
+  .plist-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(168px, 1fr); gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 2px 8px; }
+  .pcard { scroll-snap-align: start; border: 1px solid var(--hp-hairline); border-radius: 12px; background: #fff; padding: 0; text-align: left; cursor: pointer; overflow: hidden; font-family: 'Plus Jakarta Sans'; }
+  .pcard[aria-current="true"] { border-color: var(--hp-brand); box-shadow: 0 0 0 2px var(--hp-brand); }
+  .pcard .pth { aspect-ratio: 16/9; background: radial-gradient(ellipse at 50% 70%, #2a4b50 0, #0b1f22 75%); position: relative; display: block; }
+  .pcard .pn { position: absolute; left: 8px; top: 8px; min-width: 22px; height: 22px; border-radius: 11px; background: rgba(255,255,255,.92); color: var(--hp-ink); font: 800 12px/22px 'Plus Jakarta Sans'; text-align: center; padding: 0 6px; }
+  .pcard[aria-current="true"] .pn { background: var(--hp-brand); color: #fff; }
+  .pcard .pnow { position: absolute; left: 8px; bottom: 8px; color: #fff; font: 700 11px 'Plus Jakarta Sans'; letter-spacing: .06em; text-transform: uppercase; }
+  .pcard .ptk { position: absolute; right: 8px; top: 8px; width: 22px; height: 22px; border-radius: 50%; background: var(--hp-done); color: #fff; display: grid; place-items: center; font: 800 12px system-ui; }
+  .pcard .pt { display: block; padding: 9px 11px 2px; font: 700 13.5px/1.3 'Plus Jakarta Sans'; color: var(--hp-ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: calc(13.5px * 1.3 * 2 + 11px); }
+  .pcard .pd { display: block; padding: 0 11px 10px; font: 600 12px 'Plus Jakarta Sans'; color: var(--hp-ink-soft); }
+  .pcard.done .pt { color: var(--hp-ink-soft); }
+  .f2head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .f2head .hp-title { margin: 0; font-size: 22px; }
+  .f2head .grow { flex: 1; }
+  .f2head .prog { display: inline-flex; align-items: center; gap: 8px; font: 700 13px 'Plus Jakarta Sans'; color: var(--hp-ink-soft); }
+  .f2head .prog i { width: 90px; height: 6px; border-radius: 3px; background: var(--hp-hairline); position: relative; overflow: hidden; }
+  .f2head .prog i::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 28%; background: var(--hp-done); }
+  [data-text="up"] .rv { --rv-step: 1.5rem; }
+  [data-text="up"] .hp-ex-name { font-size: 1.75rem; }
+  [data-text="up"] .hp-cue { font-size: 14px; }
+  @media (max-width: 1100px) {
+    .f2 { grid-template-columns: minmax(0, 1fr); grid-template-areas: "player" "route" "list"; }
+    .f2 > .col-route { position: static; }
+    .f2 .col-route .rv-frame { max-height: none; }
+  }
+  @media (max-width: 700px) {
+    .app, .app.nav-mini { grid-template-columns: minmax(0, 1fr); }
+    .side { display: none; }
+    .top { padding: 12px 14px 8px; }
+    .card { margin: 0; border-radius: 0; }
+    .f2head .hp-title { font-size: 19px; flex-basis: 100%; }
+    .plist-row { grid-auto-columns: 62%; }
+  }
+
+  @media (max-width: 599px) {
+    [data-cc="compact"] .hp-cc-menu { position: absolute; inset: 50px 12px auto auto; width: 168px; height: auto; max-height: none; transform: none; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+    [data-cc="compact"] .hp-cc-opt { min-height: 44px; font-size: 15px; }
+  }
+  .note-tag:empty { display: none; }
+  .note-tag { position: fixed; right: 10px; bottom: 10px; background: #16232b; color: #fff; font: 600 12px system-ui; padding: 6px 10px; border-radius: 6px; opacity: .85; z-index: 9; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="side">
+    <div class="brand"><i></i><span>Preprod Clinic A</span></div>
+    <ul class="nav">
+      <li><span>Dashboard</span></li><li><span>Book a class</span></li><li><span>Requests &amp; Messages</span></li>
+      <li><span>Waiting List</span></li><li class="on"><span>Routines</span></li><li><span>Shop</span></li>
+      <li><span>Transactions</span></li><li><span>Message your studio</span></li>
+    </ul>
+  </aside>
+  <main>
+    <div class="top"><div><h1>My Routines</h1><small>Home - My Routines</small></div><div class="who"><i>CA</i>Client Alpha</div></div>
+    <div class="card"><div class="hp-wrap" id="wrap"></div></div>
+  </main>
+</div>
+<div class="note-tag" id="tag"></div>
+
+<script src="assets/route-viewer.js"></script>
+<script>
+(async function () {
+  var q = new URLSearchParams(location.search);
+  var layout = q.get("layout") || "today";
+  var root = q.get("root") || "12";
+  var cc = q.get("cc") || "none";          // none | today | compact | toggle
+  var route = q.get("route") || "compact"; // compact | open | desk
+  var at = +(q.get("at") || 0);
+  document.documentElement.dataset.root = root;
+  document.body.dataset.layout = layout;
+  document.body.dataset.cc = cc;
+  document.body.dataset.text = q.get("text") || "";
+  if (q.get("nav") === "mini" || layout === "focus" || layout === "focus2") document.getElementById("app").classList.add("nav-mini");
+  document.getElementById("tag").textContent = q.get("tag") || "";
+
+  var data = await (await fetch("routes.json")).json();
+  var clips = data.clips;
+  var done = [];
+  var thumbs = clips.map(function (c, i) { return c; });
+
+  function strip() {
+    return '<div class="strip">' + clips.map(function (c, i) {
+      return '<button aria-current="' + (i === 0) + '" class="' + (done.indexOf(i) >= 0 ? "done" : "") + '"><span class="th"><span class="n">' + (i + 1) + '</span></span><span class="t">' + c.title + '</span><span class="tk"></span></button>';
+    }).join("") + "</div>";
+  }
+  function rail() {
+    return '<div class="rail" style="position:relative">' + clips.map(function (c, i) {
+      return '<button aria-current="' + (i === 0) + '"><b>' + (i + 1) + '</b><span class="tk"></span></button>';
+    }).join("") + '<div class="rail-tip">1 · ' + clips[0].title + '</div></div>';
+  }
+  function list() {
+    return '<section><div class="hp-list-head"><h2>In this program</h2><span class="hp-tally">0 done</span></div><ul class="hp-list">' + clips.map(function (c, i) {
+      return '<li><button class="hp-row" type="button" aria-current="' + (i === 0) + '"><span class="hp-num">' + (i + 1) + '</span><span class="hp-thumb"></span><span class="hp-copy"><span class="hp-ex-title">' + c.title + '</span></span><span class="hp-tick"></span></button></li>';
+    }).join("") + "</ul></section>";
+  }
+  var ccBtn = {
+    none: "",
+    today: '<button type="button" class="hp-cc" aria-expanded="true"><svg viewBox="0 0 24 24" width="17" height="17"><rect x="2.5" y="5" width="19" height="14" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.9"/></svg><span class="hp-cc-long">Off</span></button>' +
+      '<div class="hp-cc-menu"><div class="hp-cc-menu-head"><h3 class="hp-cc-menu-title">Subtitles</h3><button type="button" class="hp-cc-close">✕</button></div><div role="radiogroup"><button type="button" role="radio" class="hp-cc-opt" aria-checked="true">Off</button><button type="button" role="radio" class="hp-cc-opt" aria-checked="false">English</button></div></div>',
+    compact: '<button type="button" class="hp-cc" aria-expanded="true"><svg viewBox="0 0 24 24" width="17" height="17"><rect x="2.5" y="5" width="19" height="14" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.9"/></svg><span class="hp-cc-long">Off</span></button>' +
+      '<div class="hp-cc-menu"><div class="hp-cc-menu-head"></div><div role="radiogroup"><button type="button" role="radio" class="hp-cc-opt" aria-checked="true">Off</button><button type="button" role="radio" class="hp-cc-opt" aria-checked="false">English</button></div></div>',
+    toggle: '<button type="button" class="cc-toggle"><span>CC</span><span class="sw"></span></button>'
+  }[cc];
+
+  var stage = '<div class="hp-stage fake-video"><div class="hp-video" style="aspect-ratio:16/9"></div><div class="figure"></div><span class="vlabel">video</span><div class="ctrl"></div><span class="hp-stamp">1 OF 7</span>' + ccBtn + "</div>";
+  var rv = document.querySelector("#rvtpl").innerHTML;
+  var body = '<div class="hp-player-body"><h2 class="hp-ex-name">' + clips[at].title + '</h2><p class="hp-cue"><b>Your therapist\'s note</b><span>Walk for PR 988: hold timer, caution, class clip.</span></p>' +
+    (layout === "side" || layout === "focus" || layout === "focus2" ? "" : rv) +
+    '<div class="hp-actions"><button class="hp-step">‹</button><button class="hp-step">›</button><span class="hp-spacer"></span><button class="hp-btn hp-btn-primary">Mark as done</button></div></div>';
+  var head = '<div class="hp-head"><div class="hp-head-main"><h1 class="hp-title">Route viewer walk (#988)</h1><p class="hp-meta"><span>Prescribed by Staff Alpha</span><span class="hp-sep">·</span><span>7 exercises</span></p></div><div class="hp-head-right"><div class="hp-ring"><svg width="62" height="62" viewBox="0 0 62 62"><circle cx="31" cy="31" r="26" fill="none" stroke="#e2e9ea" stroke-width="6"/></svg><span class="hp-ring-label">0/7<small>Today</small></span></div><a class="hp-btn hp-btn-ghost">⤓ Print program</a></div></div>';
+  var pills = '<div class="hp-switcher"><button class="hp-pill"><span>Hip and core, week 1</span><span class="hp-pill-count">3</span></button><button class="hp-pill" aria-pressed="true"><span>Route viewer walk (#988)</span><span class="hp-pill-count">7</span></button><button class="hp-pill"><span>Hip and core, week 1</span><span class="hp-pill-count">6</span></button></div>';
+  var html;
+  if (layout === "today") {
+    html = head + pills + '<div class="hp-split"><section class="hp-player">' + stage + body + "</section>" + list() + "</div>";
+  } else if (layout === "theatre") {
+    html = head + pills + strip() + '<section class="hp-player">' + stage + body + "</section>";
+  } else if (layout === "side") {
+    html = head + pills + strip() + '<div class="hp-split"><section class="hp-player">' + stage + body + '</section><div class="col-route">' + rv + "</div></div>";
+  } else if (layout === "rail") {
+    html = head + pills + '<div class="hp-split">' + rail() + '<section class="hp-player">' + stage + body + "</section></div>";
+  } else if (layout === "focus") {
+    html = '<div class="head-row"><h1 class="hp-title">Route viewer walk (#988)</h1><span class="mini-ring">0/7 today</span><span class="grow"></span><span class="listbtn">☰ 7 exercises · 1 of 7</span><a class="hp-btn hp-btn-ghost">⤓ Print</a><span class="listbtn">Hip and core, week 1 ▾</span></div>' +
+      '<div class="hp-split"><section class="hp-player">' + stage + body + '</section><div class="col-route">' + rv + "</div></div>";
+  } else if (layout === "focus2") {
+    var doses = ["Hold 60 s", "3 sets of 10", "Hold 30 s", "Hold 30 s each side", "Follow along", "5 × hold 10 s", "Hold 30 s"];
+    var doneN = +(q.get("done") || 2);
+    var cards = clips.map(function (c, i) {
+      var d = i < doneN && i !== at;
+      return '<button class="pcard' + (d ? " done" : "") + '" aria-current="' + (i === at) + '"><span class="pth"><span class="pn">' + (i + 1) + '</span>' + (d ? '<span class="ptk">✓</span>' : "") + (i === at ? '<span class="pnow">Playing</span>' : "") + '</span><span class="pt">' + c.title + '</span><span class="pd">' + doses[i] + "</span></button>";
+    }).join("");
+    html = '<div class="f2head"><h1 class="hp-title">Hip and core, week 1</h1><span class="prog"><i></i>2 of 7 done today</span><span class="grow"></span><span class="listbtn">Other programmes (2) ▾</span><a class="hp-btn hp-btn-ghost">⤓ Print</a></div>' +
+      '<div class="f2"><section class="hp-player">' + stage + body + '</section><div class="col-route">' + rv + '</div>' +
+      '<section class="plist"><div class="plist-head"><h2>In this programme</h2><span>7 exercises</span></div><div class="plist-row">' + cards + "</div></section></div>";
+  }
+  document.getElementById("wrap").innerHTML = html;
+  if (layout === "focus" || layout === "focus2") document.querySelector(".hp-wrap").style.maxWidth = "none";
+  if (layout === "theatre" || layout === "rail") document.querySelector(".hp-wrap").style.maxWidth = q.get("max") || "1180px";
+
+  var el = document.querySelector("#wrap .rv");
+  if (el) {
+    KTRouteViewer.mount(el, data.i18n);
+    KTRouteViewer.load(clips[at].route, clips[at].title);
+    if (route === "open" || layout === "side" || layout === "focus" || layout === "focus2") {
+      el.classList.add("always");
+      var x = el.querySelector(".rv-expand"); if (x && x.getAttribute("aria-expanded") !== "true") x.click();
+    }
+    var steps = +(q.get("step") || 0);
+    for (var s = 0; s < steps; s++) el.querySelector(".rv-next").click();
+  }
+  document.body.setAttribute("data-ready", "1");
+})();
+</script>
+<template id="rvtpl">
+  <section class="rv" data-surf="phone" data-scale="m" data-mode="compact" hidden aria-label="How to do it">
+    <div class="rv-frame">
+      <div class="rv-head">
+        <p class="rv-eyebrow">How to do it</p>
+        <h3 class="rv-title"></h3>
+        <ul class="rv-meta"></ul>
+        <button class="rv-expand" type="button" aria-expanded="false" aria-label="Show all stations"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <ol class="rv-progress" aria-hidden="true"></ol>
+      </div>
+      <div class="rv-mid">
+        <nav class="rv-index" aria-label="Stations"></nav>
+        <div class="rv-scroll"><ol class="rv-spine"></ol></div>
+      </div>
+      <div class="rv-bar"><div class="rv-barrow">
+        <button class="rv-btn is-ghost rv-back" type="button">Back</button>
+        <span class="rv-pos"></span><span class="rv-spacer"></span>
+        <button class="rv-btn rv-next" type="button">Next station</button>
+      </div></div>
+    </div>
+    <p class="rv-sr rv-say-live" aria-live="polite" aria-atomic="true"></p>
+  </section>
+</template>
+</body>
+</html>

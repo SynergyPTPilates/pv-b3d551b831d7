@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Builder, direction 2</title>
+<meta name="description" content="Prescribe like a note: library on the left, the prescription on the right as the same spine the client reads, with a preview of the client's phone. Mockup for the owner, 2026-10-04.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Poppins:wght@700;800&display=swap">
+<style>
+/* Tokens: corebility-website/site/src/styles/tokens.css, by name; --track/--lift/--opt from VIEWER-HANDOFF §2. Light only. */
+:root{
+  --teal:#125c65; --teal-hover:#2a8995; --teal-deep:#0c3e45; --teal-soft:#def0f3;
+  --ink:#181c32; --body:#333333; --muted:#5e6278; --faint:#8891a5;
+  --paper:#ffffff; --paper-2:#f6f6f6; --line:#eceef1; --on-teal:#ffffff; --focus:#125c65;
+  --shadow:0 1px 2px rgba(24,28,50,.04), 0 14px 34px -18px rgba(18,92,101,.28);
+  --lift:0 2px 6px rgba(24,28,50,.05), 0 30px 60px -30px rgba(18,92,101,.45);
+  --track:#c2c8d2; --opt:#6b5320; --opt-soft:#f6f1e6;
+  --rail-w:260px;
+  --font-ui:'DM Sans',system-ui,sans-serif; --font-display:'Poppins','DM Sans',sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper-2);color:var(--body);font:400 1rem/1.6 var(--font-ui);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-weight:700;line-height:1.1;text-wrap:balance;color:var(--ink);margin:0}
+button{font:inherit}
+input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem 1.5rem;border:1.5px solid var(--teal);border-radius:8px;font:600 .92rem/1 var(--font-ui);text-decoration:none;background:var(--teal);color:var(--on-teal);cursor:pointer;white-space:normal;transition:background .15s ease,border-color .15s ease}
+.btn:hover{background:var(--teal-hover);border-color:var(--teal-hover)}
+.btn.ghost{background:transparent;color:var(--teal);border-color:var(--line)}
+.btn.ghost:hover{background:var(--teal-soft);border-color:var(--teal-soft)}
+.btn.sm{padding:.6rem 1rem;font-size:.86rem}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;font:700 .78rem/1 var(--font-ui);letter-spacing:.1em;text-transform:uppercase;color:var(--teal);margin:0 0 .6rem}
+.eyebrow::before{content:'';width:1.1rem;height:2px;background:var(--teal);display:inline-block}
+.tag{font:700 .6rem/1 var(--font-ui);text-transform:uppercase;letter-spacing:.04em;padding:.3rem .5rem;border-radius:999px;background:var(--teal-soft);color:var(--teal);white-space:nowrap;display:inline-flex;align-items:center;gap:.3rem}
+.tag.opt{background:var(--opt-soft);color:var(--opt)}
+.tag.ghost{background:transparent;color:var(--faint);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* mockup chrome */
+.mockbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.5rem 1rem;background:var(--ink);color:#fff;font:600 .78rem/1 var(--font-ui)}
+.mockbar b{font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-size:.68rem;color:#8fd3d9}
+.mockbar .sp{flex:1}
+.mockbar button{font:600 .74rem/1 var(--font-ui);padding:.45rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;cursor:pointer}
+.mockbar button[aria-pressed="true"]{background:#fff;color:var(--ink);border-color:#fff}
+.mockbar a{color:#8fd3d9}
+.stage{display:flex;justify-content:center}
+.stage.phone{padding:1.5rem 0 3rem;background:#d9dde3}
+.stage.phone .shell{width:390px;min-height:844px;max-height:844px;overflow:auto;border-radius:28px;box-shadow:var(--lift);border:8px solid #1b1e28}
+
+/* shell */
+.shell{container-type:inline-size;container-name:app;width:100%;position:relative}
+.app{width:100%;background:var(--paper-2);display:grid;grid-template-columns:var(--rail-w) minmax(0,1fr);min-height:100vh;position:relative}
+.rail{background:var(--teal-deep);color:#fff;padding:1.2rem 1rem;display:flex;flex-direction:column;gap:.25rem}
+.rail .brand{display:flex;align-items:center;gap:.6rem;background:#fff;color:var(--teal);border-radius:10px;padding:.7rem .9rem;font:700 .95rem/1 var(--font-ui);margin-bottom:1.2rem}
+.rail .brand i{width:22px;height:22px;border-radius:50%;background:var(--teal);display:inline-block}
+.rail a{display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;border-radius:8px;color:rgba(255,255,255,.78);text-decoration:none;font:500 .92rem/1.2 var(--font-ui)}
+.rail a.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.rail a i{width:16px;height:16px;border:1.5px solid currentColor;border-radius:4px;opacity:.6;flex:none}
+.rail .sub{padding-left:1.6rem;font-size:.84rem}
+.topbar{display:flex;align-items:center;gap:.8rem;padding:.9rem 1.5rem;background:var(--paper);border-bottom:1px solid var(--line)}
+.topbar .crumbs{font:500 .8rem/1 var(--font-ui);color:var(--muted);display:flex;gap:.45rem;align-items:center;flex-wrap:wrap}
+.topbar .crumbs b{color:var(--ink);font-weight:600}
+.topbar .sp{flex:1}
+.topbar .who{display:flex;align-items:center;gap:.5rem;font:600 .82rem/1.1 var(--font-ui);color:var(--ink)}
+.topbar .who i{width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font:700 .74rem/1 var(--font-ui);font-style:normal}
+.menu-btn{display:none;width:40px;height:40px;border:0;background:transparent;border-radius:8px;cursor:pointer;color:var(--muted)}
+
+/* two columns */
+.work{display:grid;grid-template-columns:360px minmax(0,1fr);gap:1.25rem;padding:1.25rem 1.5rem 6rem;max-width:1180px;width:100%;align-items:start}
+
+/* ---- library column ---- */
+.lib{background:var(--paper);border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;position:sticky;top:3.2rem;max-height:calc(100vh - 4.5rem)}
+.lib header{padding:1rem 1rem .7rem;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:.7rem}
+.lib header .hrow{display:flex;align-items:center;gap:.6rem}
+.lib header h2{font:700 1rem/1.2 var(--font-ui);flex:1}
+.lib header .n{font:600 .76rem/1 var(--font-ui);color:var(--muted)}
+.search{position:relative}
+.search input{width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:.6rem .9rem .6rem 2.5rem;background:var(--paper-2);font-size:.92rem}
+.search input:focus{border-color:var(--teal);outline:0;background:var(--paper);box-shadow:0 0 0 3px var(--teal-soft)}
+.search svg{position:absolute;left:.85rem;top:50%;translate:0 -50%;width:16px;height:16px;color:var(--faint)}
+.chips{display:flex;gap:.35rem;flex-wrap:wrap}
+.chip{font:600 .76rem/1 var(--font-ui);padding:0 .7rem;min-height:32px;border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:999px;cursor:pointer;display:inline-flex;align-items:center}
+.chip[aria-pressed="true"]{background:var(--teal-soft);border-color:var(--teal-soft);color:var(--teal-deep);font-weight:700}
+.chips .lbl{font:700 .62rem/1 var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);align-self:center;margin-right:.2rem}
+.tabs{display:flex;gap:.2rem;border-bottom:1px solid var(--line);padding:0 .6rem}
+.tabs button{border:0;background:transparent;padding:.7rem .6rem;font:600 .82rem/1 var(--font-ui);color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;min-height:40px}
+.tabs button[aria-selected="true"]{color:var(--teal);border-bottom-color:var(--teal)}
+.results{flex:1;overflow:auto;padding:.4rem .5rem}
+.res{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:.6rem;align-items:center;padding:.45rem .45rem;border-radius:10px;min-height:54px}
+.res:hover{background:var(--paper-2)}
+.thumb{width:48px;height:32px;border-radius:6px;background:linear-gradient(135deg,var(--teal-deep),var(--teal));position:relative;overflow:hidden;flex:none}
+.thumb::after{content:'';position:absolute;left:50%;top:50%;translate:-50% -50%;border-left:8px solid rgba(255,255,255,.85);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.thumb.none{background:var(--paper-2)}.thumb.none::after{display:none}
+.res .t{font:600 .88rem/1.25 var(--font-ui);color:var(--ink)}
+.res .lib-n{font:500 .7rem/1.2 var(--font-ui);color:var(--faint)}
+.res .says{font:500 .7rem/1.2 var(--font-ui);color:var(--opt)}
+.add{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper);color:var(--teal);font:700 1.15rem/1 var(--font-ui);cursor:pointer;display:grid;place-items:center}
+.add:hover{background:var(--teal-soft);border-color:var(--teal-soft)}
+.add.in{background:var(--teal);border-color:var(--teal);color:#fff;font-size:.85rem}
+.lib footer{padding:.6rem 1rem .8rem;border-top:1px solid var(--line);display:flex;flex-direction:column}
+.linkbtn{border:0;background:transparent;color:var(--teal);font:600 .82rem/1 var(--font-ui);cursor:pointer;padding:.4rem 0;min-height:36px;text-align:left}
+.linkbtn.quiet{color:var(--muted)}
+.lib-close{display:none}
+
+/* ---- prescription column ---- */
+.rx{background:var(--paper);border:1px solid var(--line);border-radius:16px;min-width:0}
+.rx-top{display:flex;align-items:center;gap:.8rem;padding:.8rem 1.4rem;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.rx-top .sp{flex:1}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper)}
+.seg button{border:0;background:transparent;padding:0 .8rem;min-height:40px;font:600 .84rem/1 var(--font-ui);color:var(--muted);cursor:pointer;display:inline-flex;align-items:center;gap:.4rem}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--teal-soft);color:var(--teal-deep)}
+.client{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--ink);font:600 .84rem/1.1 var(--font-ui)}
+.client i{width:30px;height:30px;border-radius:50%;background:var(--teal-soft);color:var(--teal-deep);display:grid;place-items:center;font:700 .72rem/1 var(--font-ui);font-style:normal}
+.client em{font-style:normal;color:var(--faint);font-weight:500;font-size:.72rem;display:block}
+
+.edit{padding:1.4rem 1.6rem 1.6rem}
+.title-in{width:100%;border:0;background:transparent;padding:.1rem 0;margin:0 0 .5rem;font:800 clamp(1.4rem,2.4cqi,1.8rem)/1.15 var(--font-display);color:var(--ink);letter-spacing:-.01em;border-bottom:1.5px solid transparent;border-radius:0}
+.title-in:hover{border-bottom-color:var(--line)}.title-in:focus{border-bottom-color:var(--teal);outline:0}
+/* the first line of the prescription is the frequency, written as the client will read it */
+.firstline{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem .6rem;font:500 1rem/1.4 var(--font-ui);color:var(--body);margin:.2rem 0 .9rem}
+.firstline .lead{color:var(--muted)}
+.stepper{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:8px;background:var(--paper);overflow:hidden;vertical-align:middle}
+.stepper button{width:36px;border:0;background:transparent;color:var(--teal);font:700 1.05rem/1 var(--font-ui);cursor:pointer;min-height:40px}
+.stepper button:hover{background:var(--teal-soft)}
+.stepper output{display:grid;place-items:center;min-width:2.3rem;padding:0 .3rem;font:700 1rem/1 var(--font-ui);color:var(--ink);font-variant-numeric:tabular-nums;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.stepper.unset output{color:var(--faint);font-weight:500}
+.stepper.xs button{width:30px;min-height:34px;font-size:.95rem}.stepper.xs output{min-width:2rem;font-size:.9rem}
+.x{color:var(--faint);font-weight:600;white-space:nowrap}
+.note-in{width:100%;resize:none;border:1px solid var(--line);border-radius:10px;padding:.65rem .85rem;background:var(--paper);font:400 .95rem/1.5 var(--font-ui);color:var(--body);min-height:42px;field-sizing:content}
+.note-in:focus{border-color:var(--teal);outline:0;box-shadow:0 0 0 3px var(--teal-soft)}
+.lbl{display:block;font:600 .78rem/1 var(--font-ui);color:var(--muted);margin:0 0 .35rem}
+.rx-note{margin:0 0 1.2rem;max-width:64ch}
+
+/* the spine, builder flavour: rail + station per exercise, every station editable */
+ol.spine{list-style:none;margin:0;padding:0;counter-reset:s}
+.spine>li{position:relative;display:grid;grid-template-columns:56px minmax(0,1fr);--anchor:26px}
+.srail{position:relative}
+.seg-ln{position:absolute;left:50%;translate:-50% 0;width:2px;background:repeating-linear-gradient(to bottom,var(--track) 0 5px,transparent 5px 10px)}
+.seg-ln.up{top:0;height:calc(var(--anchor) - 14px)}
+.seg-ln.dn{top:calc(var(--anchor) + 14px);bottom:0}
+.spine>li:first-child .seg-ln.up,.spine>li:last-child .seg-ln.dn{display:none}
+.node{position:absolute;top:calc(var(--anchor) - 22px);left:50%;translate:-50% 0;width:44px;height:44px;display:grid;place-items:center;cursor:grab;border:0;background:none;padding:0}
+.node b{width:24px;height:24px;border-radius:50%;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center;font:700 .68rem/1 var(--font-ui);font-variant-numeric:tabular-nums;border:2px solid var(--paper);box-shadow:0 0 0 2px var(--teal-soft)}
+.spine>li.focus .node b{background:var(--teal);color:#fff;box-shadow:0 0 0 2px var(--teal)}
+.sbody{padding:.35rem 1.2rem 1.25rem 0;min-width:0}
+.station{border:1px solid var(--line);border-radius:14px;padding:.75rem .9rem .8rem;background:var(--paper);transition:border-color .15s ease,box-shadow .15s ease}
+.station:hover{border-color:#cdd6d8}
+.spine>li.focus .station{border-color:var(--teal);box-shadow:var(--shadow)}
+.st-head{display:flex;align-items:center;gap:.7rem}
+.st-head .t{font:700 .98rem/1.3 var(--font-ui);color:var(--ink);min-width:0}
+.st-head .t small{display:block;font:500 .72rem/1.3 var(--font-ui);color:var(--faint)}
+.st-head .sp{flex:1}
+.icon-btn{width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;flex:none}
+.icon-btn:hover{background:var(--paper-2);color:var(--ink)}
+.icon-btn svg{width:16px;height:16px}
+/* dose line: a sentence the client will read; click to edit in place */
+.dose-line{margin:.6rem 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .6rem}
+.dose-say{display:inline-flex;align-items:center;gap:.5rem;min-height:34px;padding:0 .75rem;border-radius:999px;border:1px solid var(--line);background:var(--paper-2);font:600 .84rem/1 var(--font-ui);color:var(--ink);font-variant-numeric:tabular-nums;cursor:pointer}
+.dose-say:hover{background:var(--teal-soft);border-color:var(--teal-soft)}
+.dose-say.sug{background:var(--paper);border-style:dashed;border-color:var(--track);color:var(--muted);font-weight:500}
+.dose-say.none{background:transparent;color:var(--teal)}
+.dose-edit{display:none;flex-wrap:wrap;gap:.8rem 1.3rem;align-items:flex-start;margin-top:.7rem;padding-top:.7rem;border-top:1px dashed var(--line)}
+.station.editing .dose-edit{display:flex}
+.station.editing .dose-say{display:none}
+.field{display:flex;flex-direction:column;gap:.3rem}
+.field>span{font:600 .74rem/1 var(--font-ui);color:var(--muted)}
+.field .u{font:500 .74rem/1 var(--font-ui);color:var(--faint);align-self:center;margin-left:.35rem}
+.field .src{display:inline-flex;align-items:center;gap:.35rem;font:500 .7rem/1.2 var(--font-ui);color:var(--opt);min-height:1.1rem}
+.field.sug .stepper output{color:var(--opt);background:#fbf8f1}
+.field.pres .src{color:var(--teal)}
+.dose-edit .done{align-self:flex-end;margin-left:auto}
+.tip{position:relative;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;font:700 .62rem/1 var(--font-ui);cursor:help;background:transparent;color:inherit;padding:0}
+.tip .bubble{display:none;position:absolute;left:0;top:calc(100% + 8px);z-index:5;width:min(34ch,70vw);padding:.7rem .85rem;background:var(--ink);color:#fff;border-radius:10px;font:400 .8rem/1.45 var(--font-ui);text-align:left;box-shadow:var(--shadow)}
+.tip .bubble b{display:block;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:#8fd3d9;margin-bottom:.25rem}
+.tip:hover .bubble,.tip:focus .bubble{display:block}
+/* the per-exercise note, as a branch row off the station (the client's own cue-row shape) */
+.branch{margin:.6rem 0 0;padding:0;list-style:none}
+.branch li{position:relative;margin-left:18px;padding:.5rem .7rem;font:400 .9rem/1.45 var(--font-ui);color:var(--body);background:var(--paper-2);border-radius:10px;display:flex;gap:.5rem;align-items:flex-start}
+.branch li::before{content:"";position:absolute;left:-18px;top:.8rem;height:11px;width:11px;border-left:2px solid var(--track);border-bottom:2px solid var(--track);border-bottom-left-radius:5px}
+.branch .k{font:700 .6rem/1 var(--font-ui);text-transform:uppercase;letter-spacing:.04em;padding:.25rem .45rem;border-radius:999px;background:var(--teal-soft);color:var(--teal);white-space:nowrap;flex:none;margin-top:.2rem}
+.branch textarea{flex:1;border:0;background:transparent;resize:none;padding:0;min-height:1.4rem;font:inherit;color:inherit;field-sizing:content}
+.branch textarea:focus{outline:0}
+.addnote{margin:.5rem 0 0 18px}
+/* the add-station node at the end */
+.spine>li.addrow .node b{background:var(--paper);color:var(--teal);border:1.5px dashed var(--track);box-shadow:none;font-size:.95rem}
+.spine>li.addrow .sbody{padding-bottom:.2rem}
+.addrow .station{border-style:dashed;background:transparent;display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
+.addrow .station p{margin:0;font:500 .88rem/1.4 var(--font-ui);color:var(--muted)}
+
+/* preview surface: the client's phone */
+.preview{display:none;padding:1.4rem 1.6rem 1.8rem;background:var(--paper-2);border-radius:0 0 16px 16px}
+.rx.previewing .edit{display:none}.rx.previewing .preview{display:block}
+.pv-wrap{display:flex;flex-wrap:wrap-reverse;gap:1.5rem;align-items:flex-start;justify-content:center}
+.pv-notes{flex:1 1 260px}
+.pv-notes{font:400 .92rem/1.55 var(--font-ui);color:var(--muted);max-width:44ch}
+.pv-notes h3{font:700 1rem/1.3 var(--font-ui);margin-bottom:.4rem}
+.pv-notes ul{padding-left:1.1rem;margin:.4rem 0 0}
+.phone{flex:0 1 392px;width:392px;max-width:100%;height:676px;background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--lift);overflow:auto;justify-self:end;font-size:15px}
+.cl-head{padding:1.1rem 1.15rem .9rem;border-bottom:1px solid var(--line)}
+.cl-head .eyebrow{margin-bottom:.4rem;font-size:.72rem}
+.cl-head h3{font:800 1.3rem/1.15 var(--font-display);letter-spacing:-.01em}
+.cl-head .meta{margin:.35rem 0 0;font:600 .78rem/1.3 var(--font-ui);color:var(--muted)}
+.cl-freq{display:flex;align-items:center;gap:.8rem;padding:.9rem 1.15rem;border-bottom:1px solid var(--line)}
+.cl-ring{width:52px;height:52px;border-radius:50%;border:4px solid var(--teal-soft);display:grid;place-items:center;font:700 .78rem/1 var(--font-ui);color:var(--teal-deep);flex:none}
+.cl-ring small{display:block;font:700 .5rem/1 var(--font-ui);letter-spacing:.06em;color:var(--faint);text-align:center;margin-top:.15rem}
+.cl-freq p{margin:0;font:600 .9rem/1.35 var(--font-ui);color:var(--ink)}
+.cl-freq p small{display:block;font:500 .74rem/1.3 var(--font-ui);color:var(--muted)}
+.cl-note{margin:.9rem 1.15rem 0;padding:.75rem .9rem;background:var(--teal-soft);border-radius:12px;font:400 .86rem/1.45 var(--font-ui);color:var(--teal-deep)}
+.cl-note b{display:block;font:700 .66rem/1 var(--font-ui);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.3rem}
+.cl-list{padding:1rem 1.15rem 1.2rem}
+.cl-list h4{font:700 .66rem/1 var(--font-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;display:flex;justify-content:space-between}
+.cl-row{display:grid;grid-template-columns:22px 48px minmax(0,1fr) 26px;gap:.6rem;align-items:center;padding:.6rem .7rem;border:1px solid var(--line);border-radius:12px;margin-bottom:.45rem;background:var(--paper)}
+.cl-row .n{font:700 .8rem/1 var(--font-ui);color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.cl-row .thumb{width:48px;height:32px}
+.cl-row .t{font:700 .88rem/1.25 var(--font-ui);color:var(--ink)}
+.cl-row .d{font:500 .74rem/1.3 var(--font-ui);color:var(--muted);margin-top:.1rem}
+.cl-row .nt{font:400 .76rem/1.35 var(--font-ui);color:var(--body);margin-top:.25rem;padding:.35rem .5rem;background:var(--paper-2);border-radius:8px}
+.cl-row .nt b{font:700 .58rem/1 var(--font-ui);letter-spacing:.04em;text-transform:uppercase;color:var(--teal);margin-right:.35rem}
+.cl-row .tick{width:24px;height:24px;border-radius:50%;border:2px solid var(--track)}
+.cl-bar{position:sticky;bottom:0;padding:.7rem 1.15rem .9rem;background:var(--paper);border-top:1px solid var(--line)}
+.cl-bar .btn{width:100%;min-height:46px}
+
+/* sticky save bar */
+.bar{position:sticky;bottom:0;z-index:20;margin:0 -1.5rem -6rem;grid-column:1 / -1;padding:.8rem 1.5rem;background:rgba(255,255,255,.96);border-top:1px solid var(--line);backdrop-filter:saturate(180%) blur(6px);display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.bar .status{font:500 .82rem/1.3 var(--font-ui);color:var(--muted);display:flex;align-items:center;gap:.4rem}
+.bar .status i{width:8px;height:8px;border-radius:50%;background:#2e7d32;display:inline-block}
+.bar .sp{flex:1}
+.kebab{position:relative}
+.kebab menu{display:none;position:absolute;right:0;bottom:calc(100% + 6px);margin:0;padding:.4rem;list-style:none;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:230px}
+.kebab.open menu{display:block}
+.kebab menu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:.6rem .7rem;border-radius:8px;font:500 .88rem/1.2 var(--font-ui);color:var(--ink);cursor:pointer}
+.kebab menu button:hover{background:var(--paper-2)}
+.kebab menu button small{display:block;color:var(--faint);font-size:.74rem}
+.fab{display:none}
+
+/* phone layout, by container */
+@container app (max-width: 900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .rail{display:none}
+  .menu-btn{display:grid;place-items:center}
+  .topbar{padding:.7rem 1rem}.topbar .crumbs{display:none}
+  .work{grid-template-columns:minmax(0,1fr);padding:1rem 1rem 6rem;gap:1rem}
+  .lib{position:fixed;inset:0;z-index:61;border-radius:0;max-height:none;display:none}
+  .stage.phone .lib{position:absolute}
+  .app.lib-open .lib{display:flex}
+  .lib-close{display:grid}
+  .fab{display:inline-flex;position:sticky;bottom:5.2rem;z-index:19;margin-left:auto;box-shadow:var(--lift)}
+  .rx-top{padding:.7rem 1rem}
+  .edit{padding:1rem 1rem 1.2rem}
+  .spine>li{grid-template-columns:40px minmax(0,1fr)}
+  .sbody{padding-right:0}
+  .st-head .thumb{display:none}
+  .preview{padding:1rem}
+  .phone{width:100%;height:auto;justify-self:stretch;box-shadow:none}
+  .pv-notes{order:2}
+  .bar{margin:0 -1rem -6rem;padding:.7rem 1rem}
+  .bar .status{flex:1 0 100%;order:-1}
+  .bar .btn{flex:1 1 auto}
+}
+</style>
+</head>
+<body>
+
+<div class="mockbar" role="toolbar" aria-label="Mockup controls">
+  <b>Mockup</b> Direction 2 · Prescribe like a note
+  <span class="sp"></span>
+  <span>View:</span>
+  <button type="button" data-vp="desk" aria-pressed="true">Desktop 1280</button>
+  <button type="button" data-vp="phone" aria-pressed="false">Phone 390</button>
+  <a href="README.md">README</a>
+</div>
+
+<div class="stage" id="stage">
+<div class="shell"><div class="app" id="app">
+
+  <nav class="rail" aria-label="App navigation (stand-in)">
+    <div class="brand"><i></i>Preprod Clinic A</div>
+    <a href="#"><i></i>Dashboard</a>
+    <a href="#"><i></i>Calendar</a>
+    <a href="#"><i></i>Clients</a>
+    <a href="#"><i></i>Requests &amp; Messages</a>
+    <a href="#"><i></i>Client Waiting List</a>
+    <a href="#" class="on"><i></i>Exercise Routine</a>
+    <a href="#" class="sub">General Routine Library</a>
+    <a href="#" class="sub on">Client Routine Library</a>
+    <a href="#"><i></i>Video Settings</a>
+    <a href="#"><i></i>Appointments Report</a>
+    <a href="#"><i></i>My Availability</a>
+  </nav>
+
+  <div>
+    <div class="topbar">
+      <button class="menu-btn" type="button" aria-label="Menu"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h14M3 10h14M3 15h14"/></svg></button>
+      <div class="crumbs"><span>Clients</span>›<span>Céline Dupont</span>›<b>Home programme</b></div>
+      <span class="sp"></span>
+      <div class="who"><i>SA</i><span>Staff Alpha</span></div>
+    </div>
+
+    <div class="work">
+
+      <!-- LEFT: the library -->
+      <aside class="lib" aria-labelledby="libT">
+        <header>
+          <div class="hrow"><h2 id="libT">Library</h2><span class="n">584 exercises · 14 shared programmes</span><button type="button" class="icon-btn lib-close" aria-label="Close" data-close-lib><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
+          <div class="search"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="4.5"/><path d="M11 11l3 3"/></svg><input type="search" id="q" placeholder="Search a movement" autocomplete="off"></div>
+          <div class="chips" role="group" aria-label="Region"><span class="lbl">Region</span>
+            <button type="button" class="chip" aria-pressed="true">Hip</button><button type="button" class="chip" aria-pressed="false">Core</button><button type="button" class="chip" aria-pressed="false">Knee</button><button type="button" class="chip" aria-pressed="false">Ankle &amp; foot</button><button type="button" class="chip" aria-pressed="false">Shoulder</button><button type="button" class="chip" aria-pressed="false">Spine</button></div>
+          <div class="chips" role="group" aria-label="Equipment"><span class="lbl">Kit</span>
+            <button type="button" class="chip" aria-pressed="false">None</button><button type="button" class="chip" aria-pressed="false">Theraband</button><button type="button" class="chip" aria-pressed="false">Ball</button><button type="button" class="chip" aria-pressed="false">Roller</button><button type="button" class="chip" aria-pressed="false">Wall</button></div>
+        </header>
+        <div class="tabs" role="tablist"><button type="button" role="tab" aria-selected="true">Exercises</button><button type="button" role="tab" aria-selected="false">Shared programmes</button><button type="button" role="tab" aria-selected="false">Céline's own clips</button></div>
+        <div class="results" id="results">
+          <div class="res"><span class="thumb"></span><div><div class="t">Clam, head up</div><div class="lib-n">hip- sidelying- clam head up · 25 s</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+          <div class="res"><span class="thumb"></span><div><div class="t">Clam with Theraband</div><div class="lib-n">hip- sidelying- clam with theraband · 41 s · station 3</div></div><button type="button" class="add in" aria-label="Already in the programme">✓</button></div>
+          <div class="res"><span class="thumb"></span><div><div class="t">3-way hip stretch</div><div class="lib-n">3 way hip stretch · 1:43</div><div class="says">says “hold at least 30 s”</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+          <div class="res"><span class="thumb"></span><div><div class="t">Piriformis stretch, figure 4</div><div class="lib-n">piriformis stretch -figure 4 · 33 s · station 4</div><div class="says">says “at least 30 s”</div></div><button type="button" class="add in" aria-label="Already in the programme">✓</button></div>
+          <div class="res"><span class="thumb"></span><div><div class="t">Piriformis stretch with strap</div><div class="lib-n">piriformis stretch with strap · 38 s</div><div class="says">says “about 30 s to a minute”</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+          <div class="res"><span class="thumb"></span><div><div class="t">Bridge roll up</div><div class="lib-n">bridge roll up · 55 s · station 1</div></div><button type="button" class="add in" aria-label="Already in the programme">✓</button></div>
+          <div class="res"><span class="thumb"></span><div><div class="t">Single leg bridge on the roller</div><div class="lib-n">foam roller - bridge - single leg · 48 s</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+          <div class="res"><span class="thumb"></span><div><div class="t">Hamstring stretch, hook lying</div><div class="lib-n">hamstring stretch - hook lying · 37 s</div><div class="says">says “about 60 s”</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+          <div class="res"><span class="thumb"></span><div><div class="t">Adductor stretch, butterfly</div><div class="lib-n">adductor stretch- butterfly position · 29 s</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+          <div class="res"><span class="thumb"></span><div><div class="t">Coccyx curl</div><div class="lib-n">mat - coccyx curl · 45 s · station 6</div></div><button type="button" class="add in" aria-label="Already in the programme">✓</button></div>
+          <div class="res"><span class="thumb none"></span><div><div class="t">Wall sit (clinic recording)</div><div class="lib-n">Clinic A · no how-to text yet</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+        </div>
+        <footer><button type="button" class="linkbtn">Upload or record a new exercise ›</button></footer>
+      </aside>
+
+      <!-- RIGHT: the prescription, as the spine -->
+      <section class="rx" id="rx" aria-labelledby="ttl">
+        <div class="rx-top">
+          <div class="seg" role="group" aria-label="Mode">
+            <button type="button" data-mode="edit" aria-pressed="true">Edit</button>
+            <button type="button" data-mode="preview" aria-pressed="false">Preview as Céline</button>
+          </div>
+          <span class="sp"></span>
+          <a class="client" href="#" title="Open Céline's profile in a new tab"><i>CD</i><span>Céline Dupont<em>client since 2026 · French</em></span></a>
+        </div>
+
+        <!-- EDIT -->
+        <div class="edit">
+          <p class="eyebrow">Home programme · prescribed by Staff Alpha</p>
+          <label class="sr" for="ttl">Programme name</label>
+          <input class="title-in" id="ttl" value="Hip and core, week 1">
+
+          <div class="firstline" aria-label="How often">
+            <span class="lead">Your therapist suggests</span>
+            <span class="stepper" id="freq"><button type="button" data-d="-1" aria-label="Fewer">−</button><output id="freqOut">3</output><button type="button" data-d="1" aria-label="More">+</button></span>
+            <span class="x">× per</span>
+            <span class="seg" role="group" aria-label="Per"><button type="button" data-unit="day" aria-pressed="false">day</button><button type="button" data-unit="week" aria-pressed="true">week</button><button type="button" data-unit="month" aria-pressed="false">month</button></span>
+            <span class="lead">for</span>
+            <span class="stepper xs unset" id="weeks"><button type="button" data-d="-1" aria-label="Fewer weeks">−</button><output id="wkOut">–</output><button type="button" data-d="1" aria-label="More weeks">+</button></span>
+            <span class="lead">weeks</span>
+          </div>
+
+          <div class="rx-note">
+            <label class="lbl" for="note">Note to Céline <span style="font-weight:500;color:var(--faint)">· she reads it above every exercise</span></label>
+            <textarea class="note-in" id="note" rows="1">Go gently on the first week. Stop if anything is sharp.</textarea>
+          </div>
+
+          <ol class="spine" id="spine">
+
+            <li class="focus" data-i="1">
+              <div class="srail"><span class="seg-ln up"></span><button type="button" class="node" aria-label="Station 1, drag to reorder"><b>1</b></button><span class="seg-ln dn"></span></div>
+              <div class="sbody"><div class="station">
+                <div class="st-head"><span class="thumb"></span><span class="t">Bridge roll up<small>bridge roll up · 55 s · how-to: Clinic A's own wording</small></span><span class="sp"></span>
+                  <button type="button" class="icon-btn" aria-label="Play"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6z"/></svg></button>
+                  <button type="button" class="icon-btn" aria-label="Remove from programme"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
+                <div class="dose-line"><button type="button" class="dose-say" data-edit>3 sets of 10 · hold 30 s</button><span class="tag ghost">prescribed</span></div>
+                <div class="dose-edit">
+                  <div class="field pres" data-f="sets"><span>Sets</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>3</output><button type="button" data-d="1">+</button></span><span class="src"><span class="tag">prescribed</span></span></div>
+                  <div class="field pres" data-f="reps"><span>Reps</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>10</output><button type="button" data-d="1">+</button></span><span class="src"><span class="tag">prescribed</span></span></div>
+                  <div class="field pres" data-f="hold" data-step="5"><span>Hold</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>30</output><button type="button" data-d="1">+</button><span class="u">s</span></span><span class="src"><span class="tag">prescribed</span></span></div>
+                  <button type="button" class="btn ghost sm done" data-edit>Done</button>
+                </div>
+                <button type="button" class="linkbtn quiet addnote">+ Add a note for Céline on this exercise</button>
+              </div></div>
+            </li>
+
+            <li data-i="2">
+              <div class="srail"><span class="seg-ln up"></span><button type="button" class="node" aria-label="Station 2, drag to reorder"><b>2</b></button><span class="seg-ln dn"></span></div>
+              <div class="sbody"><div class="station">
+                <div class="st-head"><span class="thumb"></span><span class="t">Alphabet writing<small>ankle and foot- alphabet writing · 54 s</small></span><span class="sp"></span>
+                  <button type="button" class="icon-btn" aria-label="Play"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6z"/></svg></button>
+                  <button type="button" class="icon-btn" aria-label="Remove from programme"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
+                <div class="dose-line"><button type="button" class="dose-say sug" data-edit>3 sets of 10</button><span class="tag opt">suggested · clinic default</span></div>
+                <div class="dose-edit">
+                  <div class="field sug" data-f="sets"><span>Sets</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>3</output><button type="button" data-d="1">+</button></span><span class="src"><span class="tag opt">suggested</span> clinic default</span></div>
+                  <div class="field sug" data-f="reps"><span>Reps</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>10</output><button type="button" data-d="1">+</button></span><span class="src"><span class="tag opt">suggested</span> clinic default</span></div>
+                  <div class="field" data-f="hold" data-step="5"><span>Hold</span><span class="stepper xs unset"><button type="button" data-d="-1">−</button><output>–</output><button type="button" data-d="1">+</button><span class="u">s</span></span><span class="src"></span></div>
+                  <button type="button" class="btn ghost sm done" data-edit>Done</button>
+                </div>
+                <button type="button" class="linkbtn quiet addnote">+ Add a note for Céline on this exercise</button>
+              </div></div>
+            </li>
+
+            <li data-i="3">
+              <div class="srail"><span class="seg-ln up"></span><button type="button" class="node" aria-label="Station 3, drag to reorder"><b>3</b></button><span class="seg-ln dn"></span></div>
+              <div class="sbody"><div class="station">
+                <div class="st-head"><span class="thumb"></span><span class="t">Clam with Theraband<small>hip- sidelying- clam with theraband · 41 s</small></span><span class="sp"></span>
+                  <button type="button" class="icon-btn" aria-label="Play"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6z"/></svg></button>
+                  <button type="button" class="icon-btn" aria-label="Remove from programme"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
+                <div class="dose-line"><button type="button" class="dose-say sug" data-edit>3 sets of 10</button><span class="tag opt">suggested · clinic default</span></div>
+                <div class="dose-edit">
+                  <div class="field sug" data-f="sets"><span>Sets</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>3</output><button type="button" data-d="1">+</button></span><span class="src"><span class="tag opt">suggested</span> clinic default</span></div>
+                  <div class="field sug" data-f="reps"><span>Reps</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>10</output><button type="button" data-d="1">+</button></span><span class="src"><span class="tag opt">suggested</span> clinic default</span></div>
+                  <div class="field" data-f="hold" data-step="5"><span>Hold</span><span class="stepper xs unset"><button type="button" data-d="-1">−</button><output>–</output><button type="button" data-d="1">+</button><span class="u">s</span></span><span class="src"></span></div>
+                  <button type="button" class="btn ghost sm done" data-edit>Done</button>
+                </div>
+                <button type="button" class="linkbtn quiet addnote">+ Add a note for Céline on this exercise</button>
+              </div></div>
+            </li>
+
+            <li data-i="4">
+              <div class="srail"><span class="seg-ln up"></span><button type="button" class="node" aria-label="Station 4, drag to reorder"><b>4</b></button><span class="seg-ln dn"></span></div>
+              <div class="sbody"><div class="station editing">
+                <div class="st-head"><span class="thumb"></span><span class="t">Piriformis stretch, figure 4<small>piriformis stretch -figure 4 · 33 s</small></span><span class="sp"></span>
+                  <button type="button" class="icon-btn" aria-label="Play"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6z"/></svg></button>
+                  <button type="button" class="icon-btn" aria-label="Remove from programme"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
+                <div class="dose-line"><button type="button" class="dose-say sug" data-edit>3 × hold 30 s</button><span class="tag opt">suggested · from the video</span></div>
+                <div class="dose-edit">
+                  <div class="field sug" data-f="sets"><span>Sets</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>3</output><button type="button" data-d="1">+</button></span><span class="src"><span class="tag opt">suggested</span> clinic default</span></div>
+                  <div class="field" data-f="reps"><span>Reps</span><span class="stepper xs unset"><button type="button" data-d="-1">−</button><output>–</output><button type="button" data-d="1">+</button></span><span class="src"></span></div>
+                  <div class="field sug" data-f="hold" data-step="5"><span>Hold</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>30</output><button type="button" data-d="1">+</button><span class="u">s</span></span>
+                    <span class="src"><span class="tag opt">suggested</span> from the video <button type="button" class="tip" aria-label="Why 30 seconds">i<span class="bubble" role="tooltip"><b>She says, at 0:24</b>“Hold the stretch for at least 30 seconds but up to a minute in order to give the muscle a chance to release.”</span></button></span></div>
+                  <button type="button" class="btn ghost sm done" data-edit>Done</button>
+                </div>
+                <button type="button" class="linkbtn quiet addnote">+ Add a note for Céline on this exercise</button>
+              </div></div>
+            </li>
+
+            <li data-i="5">
+              <div class="srail"><span class="seg-ln up"></span><button type="button" class="node" aria-label="Station 5, drag to reorder"><b>5</b></button><span class="seg-ln dn"></span></div>
+              <div class="sbody"><div class="station">
+                <div class="st-head"><span class="thumb"></span><span class="t">Free squats in second position<small>knee- squats- free squats in second position · 35 s</small></span><span class="sp"></span>
+                  <button type="button" class="icon-btn" aria-label="Play"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6z"/></svg></button>
+                  <button type="button" class="icon-btn" aria-label="Remove from programme"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
+                <div class="dose-line"><button type="button" class="dose-say" data-edit>3 sets of 12</button><span class="tag ghost">prescribed</span></div>
+                <div class="dose-edit">
+                  <div class="field pres" data-f="sets"><span>Sets</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>3</output><button type="button" data-d="1">+</button></span><span class="src"><span class="tag">prescribed</span></span></div>
+                  <div class="field pres" data-f="reps"><span>Reps</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>12</output><button type="button" data-d="1">+</button></span><span class="src"><span class="tag">prescribed</span></span></div>
+                  <div class="field" data-f="hold" data-step="5"><span>Hold</span><span class="stepper xs unset"><button type="button" data-d="-1">−</button><output>–</output><button type="button" data-d="1">+</button><span class="u">s</span></span><span class="src"></span></div>
+                  <button type="button" class="btn ghost sm done" data-edit>Done</button>
+                </div>
+                <button type="button" class="linkbtn quiet addnote">+ Add a note for Céline on this exercise</button>
+              </div></div>
+            </li>
+
+            <li data-i="6">
+              <div class="srail"><span class="seg-ln up"></span><button type="button" class="node" aria-label="Station 6, drag to reorder"><b>6</b></button><span class="seg-ln dn"></span></div>
+              <div class="sbody"><div class="station">
+                <div class="st-head"><span class="thumb"></span><span class="t">Coccyx curl<small>mat - coccyx curl · 45 s</small></span><span class="sp"></span>
+                  <button type="button" class="icon-btn" aria-label="Play"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6z"/></svg></button>
+                  <button type="button" class="icon-btn" aria-label="Remove from programme"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>
+                <div class="dose-line"><button type="button" class="dose-say sug" data-edit>3 sets of 10</button><span class="tag opt">suggested · clinic default</span></div>
+                <div class="dose-edit">
+                  <div class="field sug" data-f="sets"><span>Sets</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>3</output><button type="button" data-d="1">+</button></span><span class="src"><span class="tag opt">suggested</span> clinic default</span></div>
+                  <div class="field sug" data-f="reps"><span>Reps</span><span class="stepper xs"><button type="button" data-d="-1">−</button><output>10</output><button type="button" data-d="1">+</button></span><span class="src"><span class="tag opt">suggested</span> clinic default</span></div>
+                  <div class="field" data-f="hold" data-step="5"><span>Hold</span><span class="stepper xs unset"><button type="button" data-d="-1">−</button><output>–</output><button type="button" data-d="1">+</button><span class="u">s</span></span><span class="src"></span></div>
+                  <button type="button" class="btn ghost sm done" data-edit>Done</button>
+                </div>
+                <ul class="branch"><li><span class="k">Note</span><textarea aria-label="Note to Céline on this exercise">Start with this one if your back is sore in the morning.</textarea></li></ul>
+              </div></div>
+            </li>
+
+            <li class="addrow">
+              <div class="srail"><span class="seg-ln up"></span><span class="node" aria-hidden="true"><b>+</b></span></div>
+              <div class="sbody"><div class="station"><p>Add the next exercise from the library</p><button type="button" class="btn ghost sm" data-focus-lib>Search the library</button><button type="button" class="linkbtn quiet">or copy a shared programme</button></div></div>
+            </li>
+
+          </ol>
+        </div>
+
+        <!-- PREVIEW: the client's phone, rendered from the same data -->
+        <div class="preview" aria-label="Preview as Céline">
+          <div class="pv-wrap">
+            <div class="pv-notes">
+              <h3>What Céline will see</h3>
+              <p>Her phone, in her language, built from exactly what is on the left. Nothing here is typed twice.</p>
+              <ul>
+                <li>The frequency line reads from the first line of your prescription.</li>
+                <li>A <em>suggested</em> dose you have not touched is shown to her as prescribed, because by saving you accept it. If you would rather she see nothing, clear it.</li>
+                <li>Your note sits above every exercise; a per-exercise note sits under its own exercise.</li>
+                <li>Opening an exercise shows her the route: the clip's how-to as stations, with the hold ring where you set a hold.</li>
+              </ul>
+              <p><button type="button" class="btn ghost sm">Print sheet (PDF)</button></p>
+            </div>
+            <div class="phone" lang="fr" aria-label="Céline's phone">
+              <div class="cl-head"><p class="eyebrow">Programme à domicile</p><h3>Hip and core, week 1</h3><p class="meta">Prescrit par Staff Alpha · 6 exercices</p></div>
+              <div class="cl-freq"><div class="cl-ring">0/6<small>AUJOURD'HUI</small></div><p id="pvFreq">Votre thérapeute suggère 3 × par semaine<small>Faites les exercices dans l'ordre. Si quelque chose fait mal, arrêtez et dites-le à Staff Alpha.</small></p></div>
+              <div class="cl-note"><b>Conseil de votre thérapeute</b>Go gently on the first week. Stop if anything is sharp.</div>
+              <div class="cl-list"><h4><span>Dans ce programme</span><span>0 terminés</span></h4>
+                <div class="cl-row"><span class="n">1</span><span class="thumb"></span><div><div class="t">Bridge roll up</div><div class="d">3 séries de 10 · tenir 30 s</div></div><span class="tick"></span></div>
+                <div class="cl-row"><span class="n">2</span><span class="thumb"></span><div><div class="t">Alphabet writing</div><div class="d">3 séries de 10</div></div><span class="tick"></span></div>
+                <div class="cl-row"><span class="n">3</span><span class="thumb"></span><div><div class="t">Clam with Theraband</div><div class="d">3 séries de 10</div></div><span class="tick"></span></div>
+                <div class="cl-row"><span class="n">4</span><span class="thumb"></span><div><div class="t">Piriformis stretch, figure 4</div><div class="d">3 × tenir 30 s</div></div><span class="tick"></span></div>
+                <div class="cl-row"><span class="n">5</span><span class="thumb"></span><div><div class="t">Free squats in second position</div><div class="d">3 séries de 12</div></div><span class="tick"></span></div>
+                <div class="cl-row"><span class="n">6</span><span class="thumb"></span><div><div class="t">Coccyx curl</div><div class="d">3 séries de 10</div><div class="nt"><b>Note</b>Start with this one if your back is sore in the morning.</div></div><span class="tick"></span></div>
+              </div>
+              <div class="cl-bar"><button type="button" class="btn">Commencer</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <button type="button" class="btn fab" data-open-lib>+ Add exercises</button>
+
+      <div class="bar">
+        <span class="status"><i></i>Saved just now · Céline sees changes the next time she opens her programme</span>
+        <span class="sp"></span>
+        <button type="button" class="btn ghost">Cancel</button>
+        <div class="kebab"><button type="button" class="btn ghost" data-kebab aria-label="More save options">⋯</button>
+          <menu><li><button type="button">Save as a copy<small>Keeps this one for Céline and makes a second</small></button></li><li><button type="button">Keep a copy in shared programmes<small>Reusable for other clients</small></button></li><li><button type="button">Print sheet (PDF)</button></li></menu></div>
+        <button type="button" class="btn">Save for Céline</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div></div>
+
+<script>
+(function(){
+  var app=document.getElementById('app'),stage=document.getElementById('stage'),rx=document.getElementById('rx');
+  document.querySelectorAll('[data-vp]').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('[data-vp]').forEach(function(x){x.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');stage.classList.toggle('phone',b.dataset.vp==='phone')})});
+
+  /* mode */
+  document.querySelectorAll('[data-mode]').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('[data-mode]').forEach(function(x){x.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');rx.classList.toggle('previewing',b.dataset.mode==='preview')})});
+
+  /* library on small containers */
+  function openLib(){app.classList.add('lib-open');setTimeout(function(){document.getElementById('q').focus()},50)}
+  document.querySelectorAll('[data-open-lib],[data-focus-lib]').forEach(function(b){b.addEventListener('click',function(){openLib();document.getElementById('q').focus();document.getElementById('q').scrollIntoView({block:'nearest'})})});
+  document.querySelectorAll('[data-close-lib]').forEach(function(b){b.addEventListener('click',function(){app.classList.remove('lib-open')})});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){app.classList.remove('lib-open');document.querySelectorAll('.kebab.open').forEach(function(k){k.classList.remove('open')})}});
+  document.querySelectorAll('.res .add:not(.in)').forEach(function(b){b.addEventListener('click',function(){b.classList.add('in');b.textContent='✓';b.setAttribute('aria-label','Added');var d=b.previousElementSibling;var m=document.createElement('div');m.className='says';m.style.color='var(--teal)';m.textContent='Added as station '+(document.querySelectorAll('#spine>li:not(.addrow)').length+1);d.appendChild(m)})});
+
+  /* tabs and chips: cosmetic */
+  document.querySelectorAll('[role=tab]').forEach(function(t){t.addEventListener('click',function(){document.querySelectorAll('[role=tab]').forEach(function(x){x.setAttribute('aria-selected','false')});t.setAttribute('aria-selected','true')})});
+  document.querySelectorAll('.chip').forEach(function(c){c.addEventListener('click',function(){c.setAttribute('aria-pressed',String(c.getAttribute('aria-pressed')!=='true'))})});
+
+  /* station focus + dose edit in place */
+  document.querySelectorAll('#spine>li .station').forEach(function(st){st.addEventListener('focusin',function(){document.querySelectorAll('#spine>li').forEach(function(l){l.classList.remove('focus')});st.closest('li').classList.add('focus')})});
+  document.querySelectorAll('[data-edit]').forEach(function(b){b.addEventListener('click',function(){var st=b.closest('.station');st.classList.toggle('editing');if(!st.classList.contains('editing'))repaint(st)})});
+
+  /* kebab */
+  document.querySelectorAll('[data-kebab]').forEach(function(b){b.addEventListener('click',function(e){e.stopPropagation();var k=b.closest('.kebab');k.classList.toggle('open')})});
+  document.addEventListener('click',function(){document.querySelectorAll('.kebab.open').forEach(function(x){x.classList.remove('open')})});
+
+  /* steppers */
+  function val(f){var o=f.querySelector('output').textContent.trim();return o==='–'?null:+o}
+  document.querySelectorAll('.stepper').forEach(function(st){st.querySelectorAll('button[data-d]').forEach(function(b){b.addEventListener('click',function(){
+    var f=st.closest('.field');var inc=f&&f.dataset.step?+f.dataset.step:1;var o=st.querySelector('output');var v=o.textContent.trim();var n=(v==='–'?0:+v)+(+b.dataset.d)*inc;
+    if(n<=0){o.textContent='–';st.classList.add('unset');n=null}else{o.textContent=String(n);st.classList.remove('unset')}
+    if(f){f.classList.remove('sug');var src=f.querySelector('.src');if(n===null){f.classList.remove('pres');src.innerHTML=''}else{f.classList.add('pres');src.innerHTML='<span class="tag">prescribed</span>'}}
+    if(st.id==='freq'||st.id==='weeks')sayFreq();
+  })})});
+  function repaint(st){var s=val(st.querySelector('[data-f="sets"]')),r=val(st.querySelector('[data-f="reps"]')),h=val(st.querySelector('[data-f="hold"]'));var p=[];
+    if(s&&r)p.push(s+' sets of '+r);else if(r)p.push(r+' reps');else if(s&&h)p.push(s+' × hold '+h+' s');else if(s)p.push(s+' sets');
+    if(h&&!(s&&!r))p.push('hold '+h+' s');
+    var say=st.querySelector('.dose-say'),tag=st.querySelector('.dose-line .tag');var anySug=st.querySelector('.field.sug');say.classList.remove('sug','none');
+    if(!p.length){say.classList.add('none');say.textContent='Add a dose';tag.textContent='nothing shown to Céline';tag.className='tag ghost';return}
+    say.textContent=p.join(' · ');if(anySug){say.classList.add('sug');tag.className='tag opt';tag.textContent='suggested'}else{tag.className='tag ghost';tag.textContent='prescribed'}}
+
+  /* add a note: the branch row appears under the station */
+  document.querySelectorAll('.addnote').forEach(function(b){b.addEventListener('click',function(){var ul=document.createElement('ul');ul.className='branch';ul.innerHTML='<li><span class="k">Note</span><textarea aria-label="Note to Céline on this exercise" placeholder="e.g. keep the ribs down"></textarea></li>';b.replaceWith(ul);ul.querySelector('textarea').focus()})});
+
+  /* frequency, mirrored into the preview */
+  var unit='week';var fr={day:'par jour',week:'par semaine',month:'par mois'};
+  document.querySelectorAll('.firstline [data-unit]').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.firstline [data-unit]').forEach(function(x){x.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');unit=b.dataset.unit;sayFreq()})});
+  function sayFreq(){var n=document.getElementById('freqOut').textContent.trim();var w=document.getElementById('wkOut').textContent.trim();var p=document.getElementById('pvFreq');var small=p.querySelector('small');
+    p.textContent=(n==='–')?'Aucune fréquence indiquée':'Votre thérapeute suggère '+n+' × '+fr[unit]+(w!=='–'?' pendant '+w+' semaines':'');p.appendChild(small)}
+})();
+</script>
+</body>
+</html>

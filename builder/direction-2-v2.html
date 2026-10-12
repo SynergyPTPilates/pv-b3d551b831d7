@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Builder, direction 2 (v2)</title>
+<!-- v2, 2026-10-12: Leith's notes on direction 2. Region/kit chips gone, chrome tabs on the library,
+     one-box controls for frequency and dose, louder note, quieter preview, split save button,
+     print up front, adherence in the client chip, one-line bar on phones. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Poppins:wght@700;800&display=swap">
+<style>
+:root{
+  --teal:#125c65; --teal-hover:#2a8995; --teal-deep:#0c3e45; --teal-soft:#def0f3; --teal-wash:#f0f8f9;
+  --ink:#181c32; --body:#333333; --muted:#5e6278; --faint:#8891a5;
+  --paper:#ffffff; --paper-2:#f6f6f6; --line:#e4e7eb; --focus:#125c65;
+  --shadow:0 1px 2px rgba(24,28,50,.04), 0 14px 34px -18px rgba(18,92,101,.28);
+  --lift:0 2px 6px rgba(24,28,50,.05), 0 30px 60px -30px rgba(18,92,101,.45);
+  --track:#c2c8d2; --opt:#8a6a1f; --opt-soft:#fbf5e6; --ok:#1a8a5e;
+  --font-ui:'DM Sans',system-ui,sans-serif; --font-display:'Poppins','DM Sans',sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper-2);color:var(--body);font:400 1rem/1.5 var(--font-ui);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-weight:700;line-height:1.15;color:var(--ink);margin:0}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg{flex:none}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:42px;padding:0 1.2rem;border:1.5px solid var(--teal);border-radius:10px;font:600 .92rem/1 var(--font-ui);background:var(--teal);color:#fff;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--teal-hover);border-color:var(--teal-hover)}
+.btn.ghost{background:var(--paper);color:var(--teal);border-color:var(--line)}
+.btn.ghost:hover{background:var(--teal-wash);border-color:var(--teal-soft)}
+.btn.text{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.text:hover{background:var(--paper-2);color:var(--ink)}
+.btn svg{width:17px;height:17px}
+
+/* mockup chrome */
+.mockbar{position:sticky;top:0;z-index:80;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.5rem 1rem;background:var(--ink);color:#fff;font:600 .78rem/1 var(--font-ui)}
+.mockbar b{letter-spacing:.04em;text-transform:uppercase;font-size:.68rem;color:#8fd3d9}
+.mockbar .sp{flex:1}
+.mockbar button{font:600 .74rem/1 var(--font-ui);padding:.45rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;cursor:pointer}
+.mockbar button[aria-pressed="true"]{background:#fff;color:var(--ink)}
+.stage{display:flex;justify-content:center}
+.stage.dev{padding:1.5rem 0 3rem;background:#d9dde3}
+.stage.dev .shell{overflow:auto;border-radius:28px;box-shadow:var(--lift);border:8px solid #1b1e28}
+.stage.phone .shell{width:390px;height:844px}
+.stage.tablet .shell{width:820px;height:1180px}
+
+/* shell */
+.shell{container-type:inline-size;container-name:app;width:100%;position:relative}
+.app{background:var(--paper-2);display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh;position:relative}
+.rail{background:var(--teal-deep);color:#fff;padding:1.2rem 1rem;display:flex;flex-direction:column;gap:.25rem}
+.rail .brand{display:flex;align-items:center;gap:.6rem;background:#fff;color:var(--teal);border-radius:10px;padding:.7rem .9rem;font:700 .95rem/1 var(--font-ui);margin-bottom:1.2rem}
+.rail .brand i{width:22px;height:22px;border-radius:50%;background:var(--teal)}
+.rail a{display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;border-radius:8px;color:rgba(255,255,255,.78);text-decoration:none;font:500 .9rem/1.2 var(--font-ui)}
+.rail a.on{background:rgba(255,255,255,.12);color:#fff;font-weight:600}
+.rail a i{width:16px;height:16px;border:1.5px solid currentColor;border-radius:4px;opacity:.6}
+.rail .sub{padding-left:1.6rem;font-size:.84rem}
+.topbar{display:flex;align-items:center;gap:.8rem;padding:.85rem 1.5rem;background:var(--paper);border-bottom:1px solid var(--line)}
+.crumbs{font:500 .8rem/1 var(--font-ui);color:var(--muted);display:flex;gap:.45rem;align-items:center}
+.crumbs b{color:var(--ink);font-weight:600}
+.topbar .sp{flex:1}
+.who{display:flex;align-items:center;gap:.5rem;font:600 .82rem/1 var(--font-ui);color:var(--ink)}
+.who i{width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font:700 .74rem/1 var(--font-ui);font-style:normal}
+.menu-btn{display:none;width:40px;height:40px;border:0;background:transparent;border-radius:8px;color:var(--muted)}
+
+.work{display:grid;grid-template-columns:minmax(300px,360px) minmax(0,1fr);gap:1.25rem;padding:1.25rem 1.5rem 0;max-width:1240px;width:100%;align-items:start}
+
+/* ---- library: chrome tabs over a teal-outlined box ---- */
+.lib{position:sticky;top:3.4rem;display:flex;flex-direction:column;max-height:calc(100vh - 9rem)}
+.lib-tabs{display:flex;gap:4px;padding:0 10px;position:relative;z-index:1}
+.lib-tabs button{flex:1 1 0;min-width:0;border:1.5px solid transparent;border-bottom:0;border-radius:10px 10px 0 0;background:var(--teal-soft);color:var(--teal-deep);padding:.6rem .5rem .55rem;font:600 .8rem/1.1 var(--font-ui);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.lib-tabs button small{font:600 .68rem/1 var(--font-ui);opacity:.7}
+.lib-tabs button:hover{background:#cfe7eb}
+.lib-tabs button[aria-selected="true"]{background:var(--teal);color:#fff;border-color:var(--teal)}
+.lib-box{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--paper);border:1.5px solid var(--teal);border-radius:14px;overflow:hidden}
+.lib-search{padding:.85rem .85rem .6rem;display:flex;gap:.5rem;align-items:center;border-bottom:1px solid var(--line)}
+.search{position:relative;flex:1}
+.search input{width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:.55rem .8rem .55rem 2.4rem;background:var(--paper-2);font-size:.95rem}
+.search input:focus{border-color:var(--teal);outline:0;background:var(--paper);box-shadow:0 0 0 3px var(--teal-soft)}
+.search svg{position:absolute;left:.8rem;top:50%;translate:0 -50%;width:16px;height:16px;color:var(--faint)}
+.lib .lib-close{display:none}
+.results{flex:1;overflow:auto;padding:.35rem .45rem}
+.res{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:.7rem;align-items:center;padding:.5rem;border-radius:10px}
+.res:hover{background:var(--teal-wash)}
+.thumb{width:52px;height:34px;border-radius:7px;background:linear-gradient(135deg,var(--teal-deep),var(--teal));position:relative}
+.thumb::after{content:'';position:absolute;left:50%;top:50%;translate:-40% -50%;border-left:8px solid rgba(255,255,255,.85);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.res .t{font:600 .9rem/1.25 var(--font-ui);color:var(--ink)}
+.res .m{font:500 .74rem/1.3 var(--font-ui);color:var(--faint);margin-top:.1rem}
+.add{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper);color:var(--teal);font:700 1.1rem/1 var(--font-ui);cursor:pointer;display:grid;place-items:center}
+.add:hover{background:var(--teal-soft);border-color:var(--teal-soft)}
+.add.in{background:var(--teal);border-color:var(--teal);color:#fff;font-size:.85rem}
+.lib-foot{padding:.55rem .85rem;border-top:1px solid var(--line)}
+.linkbtn{border:0;background:transparent;color:var(--teal);font:600 .84rem/1 var(--font-ui);cursor:pointer;padding:.45rem 0;display:inline-flex;gap:.4rem;align-items:center}
+
+/* ---- prescription ---- */
+.rx{background:var(--paper);border:1px solid var(--line);border-radius:16px;min-width:0;margin-top:calc(.6rem*2 + 1.9rem - 1px)}
+.rx-top{display:flex;align-items:center;gap:.75rem;padding:.75rem 1.25rem;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.rx-top .sp{flex:1}
+.mode{display:inline-flex;padding:3px;border-radius:10px;background:var(--paper-2);border:1px solid var(--line)}
+.mode button{border:0;background:transparent;border-radius:8px;padding:0 .9rem;min-height:34px;font:600 .85rem/1 var(--font-ui);color:var(--muted);cursor:pointer}
+.mode button[aria-pressed="true"]{background:var(--paper);color:var(--teal-deep);box-shadow:0 1px 3px rgba(24,28,50,.12)}
+/* client chip with adherence: the same numbers as the profile's routines tab */
+.client{display:flex;align-items:center;gap:.65rem;padding:.35rem .7rem .35rem .4rem;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--ink)}
+.client:hover{border-color:var(--teal-soft);background:var(--teal-wash)}
+.client i{width:32px;height:32px;border-radius:50%;background:var(--teal-soft);color:var(--teal-deep);display:grid;place-items:center;font:700 .72rem/1 var(--font-ui);font-style:normal}
+.client .nm{font:700 .85rem/1.1 var(--font-ui)}
+.client .ad{display:flex;align-items:center;gap:.45rem;font:500 .74rem/1 var(--font-ui);color:var(--muted);margin-top:.25rem}
+.dots{display:inline-flex;gap:2px}
+.dots s{width:5px;height:10px;border-radius:2px;background:var(--line);text-decoration:none}
+.dots s.d{background:var(--ok)}
+
+.edit{padding:1.4rem 1.6rem 1.6rem}
+.title-in{width:100%;border:0;background:transparent;padding:.1rem 0;margin:0 0 1rem;font:800 clamp(1.35rem,2.4cqi,1.75rem)/1.15 var(--font-display);color:var(--ink);border-bottom:1.5px solid transparent;border-radius:0}
+.title-in:hover{border-bottom-color:var(--line)}.title-in:focus{border-bottom-color:var(--teal);outline:0}
+
+/* one-box control: label + selects in a single bordered field. Used for frequency and dose. */
+.box{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;background:var(--paper);overflow:hidden;max-width:100%;flex-wrap:wrap}
+.box .cell{display:flex;flex-direction:column;justify-content:center;padding:.35rem .4rem .35rem .75rem;min-height:48px;position:relative}
+.box .cell+.cell{border-left:1px solid var(--line)}
+.box .cell>span{font:700 .62rem/1 var(--font-ui);letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin-bottom:.2rem}
+.box select{appearance:none;border:0;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235e6278' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right .3rem center;padding:0 1.3rem 0 0;font:700 .98rem/1.3 var(--font-ui);color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums}
+.box select:focus{outline:0}
+.box .cell:focus-within{background:var(--teal-wash)}
+.box .cell.unset select{color:var(--faint);font-weight:500}
+.box .cell.sug select{color:var(--opt)}
+.box .cell.sug{background:var(--opt-soft)}
+.box .cell.sug::after{content:"";position:absolute;right:5px;top:5px;width:6px;height:6px;border-radius:50%;background:#d4a53c}
+.field-row{display:flex;align-items:center;gap:.6rem 1rem;flex-wrap:wrap;margin:0 0 1rem}
+.field-row>label{font:600 .85rem/1 var(--font-ui);color:var(--muted);min-width:5.5rem}
+
+/* the note: a visible card, not a faint textarea */
+.note{display:flex;gap:.75rem;align-items:flex-start;margin:0 0 1.5rem;padding:.85rem 1rem;background:var(--teal-wash);border:1px solid var(--teal-soft);border-left:4px solid var(--teal);border-radius:10px}
+.note svg{width:20px;height:20px;color:var(--teal);margin-top:.15rem}
+.note .in{flex:1;min-width:0}
+.note label{display:block;font:700 .8rem/1 var(--font-ui);color:var(--teal-deep);margin-bottom:.35rem}
+.note textarea{width:100%;border:0;background:transparent;resize:none;padding:0;font:400 1rem/1.5 var(--font-ui);color:var(--ink);field-sizing:content;min-height:1.5em}
+.note textarea:focus{outline:0}
+.note:focus-within{box-shadow:0 0 0 3px var(--teal-soft)}
+
+/* the spine */
+ol.spine{list-style:none;margin:0;padding:0}
+.spine>li{display:grid;grid-template-columns:48px minmax(0,1fr);--anchor:30px;position:relative}
+.srail{position:relative}
+.seg-ln{position:absolute;left:50%;translate:-50% 0;width:2px;background:repeating-linear-gradient(to bottom,var(--track) 0 5px,transparent 5px 10px)}
+.seg-ln.up{top:0;height:calc(var(--anchor) - 14px)}
+.seg-ln.dn{top:calc(var(--anchor) + 14px);bottom:0}
+.spine>li:first-child .seg-ln.up{display:none}
+.node{position:absolute;top:calc(var(--anchor) - 14px);left:50%;translate:-50% 0;width:28px;height:28px;border-radius:50%;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center;font:700 .74rem/1 var(--font-ui);border:0;cursor:grab}
+.spine>li.focus .node{background:var(--teal);color:#fff}
+.sbody{padding:0 0 .9rem;min-width:0}
+.station{border:1px solid var(--line);border-radius:14px;padding:.8rem .9rem .9rem;background:var(--paper)}
+.station:hover{border-color:#cdd6d8}
+.spine>li.focus .station{border-color:var(--teal);box-shadow:var(--shadow)}
+.st-head{display:flex;align-items:center;gap:.75rem}
+.st-head .t{font:700 1rem/1.3 var(--font-ui);color:var(--ink);min-width:0;flex:1}
+.st-head .t small{display:block;font:500 .74rem/1.3 var(--font-ui);color:var(--faint)}
+.icon-btn{width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.icon-btn:hover{background:var(--paper-2);color:var(--ink)}
+.icon-btn svg{width:16px;height:16px}
+.st-dose{display:flex;align-items:center;gap:.6rem 1rem;flex-wrap:wrap;margin-top:.75rem}
+.st-dose .sp{flex:1}
+.addnote{border:1px dashed var(--track);background:transparent;border-radius:999px;color:var(--teal);font:600 .82rem/1 var(--font-ui);padding:0 .9rem;min-height:36px;cursor:pointer;display:inline-flex;align-items:center;gap:.35rem}
+.addnote:hover{background:var(--teal-wash);border-color:var(--teal-soft)}
+.sug-key{display:inline-flex;align-items:center;gap:.35rem;font:500 .75rem/1 var(--font-ui);color:var(--opt)}
+.sug-key::before{content:"";width:6px;height:6px;border-radius:50%;background:#d4a53c}
+.st-note{margin-top:.75rem;display:flex;gap:.6rem;align-items:flex-start;padding:.6rem .75rem;background:var(--teal-wash);border-radius:10px;border-left:3px solid var(--teal)}
+.st-note textarea{flex:1;border:0;background:transparent;resize:none;padding:0;font:400 .92rem/1.45 var(--font-ui);color:var(--ink);field-sizing:content;min-height:1.4em}
+.st-note textarea:focus{outline:0}
+.st-note b{font:700 .72rem/1.6 var(--font-ui);color:var(--teal-deep)}
+.addrow .station{border-style:dashed;background:transparent;display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
+.addrow .node{background:var(--paper);border:1.5px dashed var(--track);color:var(--teal)}
+.addrow p{margin:0;font:500 .9rem/1.4 var(--font-ui);color:var(--muted);flex:1}
+
+/* preview: just the client's screen */
+.preview{display:none;padding:1.5rem;background:var(--paper-2);border-radius:0 0 16px 16px;justify-items:center}
+.rx.previewing .edit{display:none}.rx.previewing .preview{display:grid}
+.phone{width:380px;max-width:100%;height:680px;background:var(--paper);border:1px solid var(--line);border-radius:22px;box-shadow:var(--lift);overflow:auto;font-size:15px}
+.cl-head{padding:1.1rem 1.15rem .9rem;border-bottom:1px solid var(--line)}
+.cl-head h3{font:800 1.3rem/1.15 var(--font-display)}
+.cl-head .meta{margin:.35rem 0 0;font:600 .78rem/1.3 var(--font-ui);color:var(--muted)}
+.cl-freq{display:flex;align-items:center;gap:.8rem;padding:.9rem 1.15rem;border-bottom:1px solid var(--line)}
+.cl-ring{width:50px;height:50px;border-radius:50%;border:4px solid var(--teal-soft);display:grid;place-items:center;font:700 .8rem/1 var(--font-ui);color:var(--teal-deep)}
+.cl-freq p{margin:0;font:600 .9rem/1.35 var(--font-ui);color:var(--ink)}
+.cl-note{margin:.9rem 1.15rem 0;padding:.75rem .9rem;background:var(--teal-wash);border-left:3px solid var(--teal);border-radius:10px;font:400 .88rem/1.45 var(--font-ui);color:var(--ink)}
+.cl-list{padding:1rem 1.15rem 1.2rem}
+.cl-row{display:grid;grid-template-columns:22px 48px minmax(0,1fr) 26px;gap:.6rem;align-items:center;padding:.6rem .7rem;border:1px solid var(--line);border-radius:12px;margin-bottom:.45rem}
+.cl-row .n{font:700 .8rem/1 var(--font-ui);color:var(--muted);text-align:center}
+.cl-row .thumb{width:48px;height:32px}
+.cl-row .t{font:700 .88rem/1.25 var(--font-ui);color:var(--ink)}
+.cl-row .d{font:500 .76rem/1.3 var(--font-ui);color:var(--muted);margin-top:.1rem}
+.cl-row .nt{font:400 .78rem/1.35 var(--font-ui);color:var(--body);margin-top:.3rem;padding:.35rem .5rem;background:var(--teal-wash);border-radius:8px}
+.cl-row .tick{width:24px;height:24px;border-radius:50%;border:2px solid var(--track)}
+.cl-bar{position:sticky;bottom:0;padding:.7rem 1.15rem .9rem;background:var(--paper);border-top:1px solid var(--line)}
+.cl-bar .btn{width:100%;min-height:46px}
+
+/* bottom bar: status left; print, cancel, split save right */
+.bar{position:sticky;bottom:0;z-index:20;grid-column:1 / -1;margin:1.25rem -1.5rem 0;padding:.75rem 1.5rem;background:rgba(255,255,255,.96);border-top:1px solid var(--line);backdrop-filter:blur(6px);display:flex;align-items:center;gap:.6rem}
+.status{display:flex;align-items:center;gap:.45rem;font:600 .84rem/1 var(--font-ui);color:var(--muted);min-width:0;white-space:nowrap}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.bar .sp{flex:1}
+.split{display:inline-flex;position:relative}
+.split .btn:first-child{border-radius:10px 0 0 10px;gap:0}
+.split .caret{border-radius:0 10px 10px 0;padding:0 .7rem;border-left:1px solid rgba(255,255,255,.35)}
+.split menu{display:none;position:absolute;right:0;bottom:calc(100% + 8px);margin:0;padding:.4rem;list-style:none;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:var(--lift);min-width:270px;z-index:30}
+.split.open menu{display:block}
+.split menu button{display:flex;gap:.7rem;align-items:flex-start;width:100%;text-align:left;border:0;background:transparent;padding:.65rem .7rem;border-radius:8px;font:600 .9rem/1.25 var(--font-ui);color:var(--ink);cursor:pointer}
+.split menu button:hover{background:var(--teal-wash)}
+.split menu svg{width:18px;height:18px;color:var(--teal);margin-top:.05rem}
+.split menu small{display:block;font:500 .76rem/1.3 var(--font-ui);color:var(--muted);margin-top:.15rem}
+.split menu hr{border:0;border-top:1px solid var(--line);margin:.3rem .4rem}
+.fab{display:none}
+
+/* tablet portrait and phone: library becomes a sheet */
+@container app (max-width: 900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .rail{display:none}
+  .menu-btn{display:grid;place-items:center}
+  .crumbs span{display:none}
+  .topbar{padding:.6rem 1rem}
+  .work{grid-template-columns:minmax(0,1fr);padding:1rem 1rem 0;gap:1rem}
+  .rx{margin-top:0}
+  .lib{position:absolute;inset:0;z-index:61;max-height:none;display:none;background:var(--paper-2);padding:.75rem .75rem 0}
+  .app.lib-open .lib{display:flex}
+  .lib .lib-close{display:grid}
+  .fab{display:inline-flex;position:sticky;bottom:5rem;z-index:19;justify-self:end;box-shadow:var(--lift);border-radius:999px}
+}
+@container app (max-width: 560px){
+  .work{padding:.75rem .75rem 0;gap:.75rem}
+  .rx{border-radius:14px}
+  .rx-top{padding:.6rem .75rem;gap:.5rem}
+  .rx-top .sp{display:none}
+  .rx-top .client{order:-1;flex:1 1 100%}
+  .rx-top .print-top{margin-left:auto}
+  .edit{padding:1rem .85rem 1.1rem}
+  .field-row>label{min-width:0;flex:1 1 100%}
+  .field-row{gap:.4rem}
+  .box .cell{padding:.3rem .3rem .3rem .6rem;min-height:46px}
+  .spine>li{grid-template-columns:34px minmax(0,1fr)}
+  .st-head .thumb{display:none}
+  .station{padding:.7rem .7rem .8rem}
+  .st-dose .sp{display:none}
+  .st-dose .sug-key{display:none}
+  .st-dose{gap:.5rem}
+  .preview{padding:.75rem}
+  .phone{height:auto;box-shadow:none}
+  .bar{margin:1rem -.75rem 0;padding:.6rem .75rem;gap:.4rem}
+  .bar .print-bar,.bar .lbl-long{display:none}
+  .bar .btn{min-height:40px;padding:0 .8rem}
+  .split .caret{padding:0 .55rem}
+  .status{font-size:.78rem}
+}
+</style>
+</head>
+<body>
+
+<div class="mockbar" role="toolbar" aria-label="Mockup controls">
+  <b>Mockup</b> Direction 2, v2
+  <span class="sp"></span>
+  <button type="button" data-vp="desk" aria-pressed="true">Desktop</button>
+  <button type="button" data-vp="tablet" aria-pressed="false">Tablet 820</button>
+  <button type="button" data-vp="phone" aria-pressed="false">Phone 390</button>
+</div>
+
+<div class="stage" id="stage">
+<div class="shell"><div class="app" id="app">
+
+  <nav class="rail" aria-label="App navigation (stand-in)">
+    <div class="brand"><i></i>Preprod Clinic A</div>
+    <a href="#"><i></i>Dashboard</a><a href="#"><i></i>Calendar</a><a href="#"><i></i>Clients</a>
+    <a href="#"><i></i>Requests &amp; Messages</a><a href="#" class="on"><i></i>Exercise Routine</a>
+    <a href="#" class="sub">General Routine Library</a><a href="#" class="sub on">Client Routine Library</a>
+    <a href="#"><i></i>Video Settings</a><a href="#"><i></i>My Availability</a>
+  </nav>
+
+  <div>
+    <div class="topbar">
+      <button class="menu-btn" type="button" aria-label="Menu"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h14M3 10h14M3 15h14"/></svg></button>
+      <div class="crumbs"><span>Clients</span><span>›</span><span>Céline Dupont</span><span>›</span><b>Home programme</b></div>
+      <span class="sp"></span>
+      <div class="who"><i>SA</i></div>
+    </div>
+
+    <div class="work">
+
+      <aside class="lib" aria-label="Library">
+        <div class="lib-tabs" role="tablist">
+          <button type="button" role="tab" aria-selected="true">Exercises<small>584</small></button>
+          <button type="button" role="tab" aria-selected="false">Programmes<small>14</small></button>
+          <button type="button" role="tab" aria-selected="false">Céline's clips<small>3</small></button>
+        </div>
+        <div class="lib-box">
+          <div class="lib-search">
+            <div class="search"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="4.5"/><path d="M11 11l3 3"/></svg><input type="search" id="q" placeholder="Search, e.g. clam, hip, theraband" autocomplete="off"></div>
+            <button type="button" class="icon-btn lib-close" aria-label="Close" data-close-lib><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg></button>
+          </div>
+          <div class="results">
+            <div class="res"><span class="thumb"></span><div><div class="t">Clam, head up</div><div class="m">25 s</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+            <div class="res"><span class="thumb"></span><div><div class="t">Clam with Theraband</div><div class="m">41 s · in programme</div></div><button type="button" class="add in" aria-label="In the programme">✓</button></div>
+            <div class="res"><span class="thumb"></span><div><div class="t">3-way hip stretch</div><div class="m">1:43</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+            <div class="res"><span class="thumb"></span><div><div class="t">Piriformis stretch, figure 4</div><div class="m">33 s · in programme</div></div><button type="button" class="add in" aria-label="In the programme">✓</button></div>
+            <div class="res"><span class="thumb"></span><div><div class="t">Piriformis stretch with strap</div><div class="m">38 s</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+            <div class="res"><span class="thumb"></span><div><div class="t">Bridge roll up</div><div class="m">55 s · in programme</div></div><button type="button" class="add in" aria-label="In the programme">✓</button></div>
+            <div class="res"><span class="thumb"></span><div><div class="t">Single leg bridge on the roller</div><div class="m">48 s</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+            <div class="res"><span class="thumb"></span><div><div class="t">Hamstring stretch, hook lying</div><div class="m">37 s</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+            <div class="res"><span class="thumb"></span><div><div class="t">Adductor stretch, butterfly</div><div class="m">29 s</div></div><button type="button" class="add" aria-label="Add">+</button></div>
+            <div class="res"><span class="thumb"></span><div><div class="t">Coccyx curl</div><div class="m">45 s · in programme</div></div><button type="button" class="add in" aria-label="In the programme">✓</button></div>
+          </div>
+          <div class="lib-foot"><button type="button" class="linkbtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v10M3 8h10"/></svg>Upload a new exercise</button></div>
+        </div>
+      </aside>
+
+      <section class="rx" id="rx" aria-labelledby="ttl">
+        <div class="rx-top">
+          <div class="mode" role="group" aria-label="Mode">
+            <button type="button" data-mode="edit" aria-pressed="true">Edit</button>
+            <button type="button" data-mode="preview" aria-pressed="false">Preview</button>
+          </div>
+          <span class="sp"></span>
+          <a class="client" href="#" title="Céline's profile: routines tab"><i>CD</i><span><span class="nm">Céline Dupont</span><span class="ad"><span class="dots" aria-hidden="true"><s class="d"></s><s></s><s class="d"></s><s></s><s></s><s class="d"></s><s></s><s class="d"></s><s></s><s class="d"></s><s></s><s></s><s class="d"></s><s class="d"></s></span>9 sessions in 4 weeks · last Fri</span></span></a>
+          <button type="button" class="btn ghost print-top"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 8V3h10v5M5 14H3V8h14v6h-2M6 12h8v5H6z"/></svg>Print PDF</button>
+        </div>
+
+        <div class="edit">
+          <label class="sr" for="ttl">Programme name</label>
+          <input class="title-in" id="ttl" value="Hip and core, week 1">
+
+          <div class="field-row">
+            <label>How often</label>
+            <div class="box" id="freq">
+              <div class="cell"><span>Times</span><select aria-label="Times"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></div>
+              <div class="cell"><span>Per</span><select aria-label="Per"><option>day</option><option selected>week</option><option>month</option></select></div>
+              <div class="cell unset"><span>For</span><select aria-label="For how long"><option selected>ongoing</option><option>1 week</option><option>2 weeks</option><option>4 weeks</option><option>6 weeks</option><option>8 weeks</option></select></div>
+            </div>
+          </div>
+
+          <div class="note">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h12v9H9l-4 3v-3H4z"/></svg>
+            <div class="in"><label for="note">Note for Céline</label><textarea id="note" rows="1" placeholder="Shown at the top of her programme">Go gently on the first week. Stop if anything is sharp.</textarea></div>
+          </div>
+
+          <ol class="spine" id="spine"></ol>
+        </div>
+
+        <div class="preview" aria-label="Preview">
+          <div class="phone" lang="fr">
+            <div class="cl-head"><h3>Hip and core, week 1</h3><p class="meta">Staff Alpha · 6 exercices</p></div>
+            <div class="cl-freq"><div class="cl-ring">0/6</div><p>3 × par semaine</p></div>
+            <div class="cl-note">Go gently on the first week. Stop if anything is sharp.</div>
+            <div class="cl-list">
+              <div class="cl-row"><span class="n">1</span><span class="thumb"></span><div><div class="t">Bridge roll up</div><div class="d">3 × 10 · tenir 30 s</div></div><span class="tick"></span></div>
+              <div class="cl-row"><span class="n">2</span><span class="thumb"></span><div><div class="t">Alphabet writing</div><div class="d">3 × 10</div></div><span class="tick"></span></div>
+              <div class="cl-row"><span class="n">3</span><span class="thumb"></span><div><div class="t">Clam with Theraband</div><div class="d">3 × 10</div></div><span class="tick"></span></div>
+              <div class="cl-row"><span class="n">4</span><span class="thumb"></span><div><div class="t">Piriformis stretch, figure 4</div><div class="d">3 × tenir 30 s</div></div><span class="tick"></span></div>
+              <div class="cl-row"><span class="n">5</span><span class="thumb"></span><div><div class="t">Free squats in second position</div><div class="d">3 × 12</div></div><span class="tick"></span></div>
+              <div class="cl-row"><span class="n">6</span><span class="thumb"></span><div><div class="t">Coccyx curl</div><div class="d">3 × 10</div><div class="nt">Start with this one if your back is sore in the morning.</div></div><span class="tick"></span></div>
+            </div>
+            <div class="cl-bar"><button type="button" class="btn">Commencer</button></div>
+          </div>
+        </div>
+      </section>
+
+      <button type="button" class="btn fab" data-open-lib><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v10M3 8h10"/></svg>Add exercises</button>
+
+      <div class="bar">
+        <span class="status"><i></i>Saved just now</span>
+        <span class="sp"></span>
+        <button type="button" class="btn text">Cancel</button>
+        <div class="split" id="split">
+          <button type="button" class="btn">Save<span class="lbl-long">&nbsp;for Céline</span></button>
+          <button type="button" class="btn caret" aria-label="More ways to save" data-split><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7.5l3-3 3 3"/></svg></button>
+          <menu>
+            <li><button type="button"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="6" width="10" height="11" rx="2"/><path d="M4 13V4a1 1 0 0 1 1-1h8"/></svg><span>Save as a new programme<small>Céline keeps both. Use it for week 2.</small></span></button></li>
+            <li><button type="button"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h14v10H3zM3 6l2-3h10l2 3"/></svg><span>Add to shared programmes<small>Reuse it with other clients.</small></span></button></li>
+            <li><hr></li>
+            <li><button type="button"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="7" r="3"/><path d="M2.5 17c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5M15 7v6M12 10h6"/></svg><span>Give a copy to another client</span></button></li>
+          </menu>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div></div>
+
+<script>
+(function(){
+  var ex=[
+    {t:'Bridge roll up',m:'55 s',d:{sets:[3,0],reps:[10,0],hold:[30,0]}},
+    {t:'Alphabet writing',m:'54 s',d:{sets:[3,1],reps:[10,1],hold:[0,0]}},
+    {t:'Clam with Theraband',m:'41 s',d:{sets:[3,1],reps:[10,1],hold:[0,0]}},
+    {t:'Piriformis stretch, figure 4',m:'33 s',d:{sets:[3,1],reps:[0,0],hold:[30,1]}},
+    {t:'Free squats in second position',m:'35 s',d:{sets:[3,0],reps:[12,0],hold:[0,0]}},
+    {t:'Coccyx curl',m:'45 s',d:{sets:[3,1],reps:[10,1],hold:[0,0]},note:'Start with this one if your back is sore in the morning.'}
+  ];
+  function sel(name,v,opts,unit){return '<div class="cell'+(v[0]?'':' unset')+(v[1]&&v[0]?' sug':'')+'"><span>'+name+'</span><select aria-label="'+name+'">'+['<option value="0">–</option>'].concat(opts.map(function(o){return '<option'+(o===v[0]?' selected':'')+' value="'+o+'">'+o+(unit||'')+'</option>'})).join('')+'</select></div>'}
+  var html=ex.map(function(e,i){
+    var anySug=e.d.sets[1]||e.d.reps[1]||e.d.hold[1];
+    return '<li class="'+(i===0?'focus':'')+'"><div class="srail"><span class="seg-ln up"></span><button type="button" class="node" aria-label="Exercise '+(i+1)+', drag to reorder">'+(i+1)+'</button><span class="seg-ln dn"></span></div>'+
+    '<div class="sbody"><div class="station"><div class="st-head"><span class="thumb"></span><span class="t">'+e.t+'<small>'+e.m+'</small></span>'+
+    '<button type="button" class="icon-btn" aria-label="Play"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6z"/></svg></button>'+
+    '<button type="button" class="icon-btn" aria-label="Remove"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l10 10M13 3L3 13"/></svg></button></div>'+
+    '<div class="st-dose"><div class="box">'+sel('Sets',e.d.sets,[1,2,3,4,5])+sel('Reps',e.d.reps,[5,6,8,10,12,15,20])+sel('Hold',e.d.hold,[5,10,15,20,30,45,60],' s')+'</div>'+
+    (anySug?'<span class="sug-key">suggested</span>':'')+'<span class="sp"></span>'+
+    (e.note?'':'<button type="button" class="addnote">+ Note</button>')+'</div>'+
+    (e.note?'<div class="st-note"><b>Note</b><textarea rows="1" aria-label="Note on this exercise">'+e.note+'</textarea></div>':'')+
+    '</div></div></li>';
+  }).join('')+'<li class="addrow"><div class="srail"><span class="seg-ln up"></span><span class="node" aria-hidden="true">+</span></div><div class="sbody"><div class="station"><p>Add from the library</p><button type="button" class="btn ghost" data-open-lib>Browse</button></div></div></li>';
+  document.getElementById('spine').innerHTML=html;
+
+  var app=document.getElementById('app'),stage=document.getElementById('stage'),rx=document.getElementById('rx');
+  function vp(v){document.querySelectorAll('[data-vp]').forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.vp===v))});stage.className='stage'+(v==='desk'?'':' dev '+v)}
+  document.querySelectorAll('[data-vp]').forEach(function(b){b.addEventListener('click',function(){vp(b.dataset.vp)})});
+  document.querySelectorAll('[data-mode]').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('[data-mode]').forEach(function(x){x.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');rx.classList.toggle('previewing',b.dataset.mode==='preview')})});
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('[data-open-lib]');if(t){app.classList.add('lib-open');return}
+    if(e.target.closest('[data-close-lib]')){app.classList.remove('lib-open');return}
+    if(e.target.closest('[data-split]')){document.getElementById('split').classList.toggle('open');return}
+    if(!e.target.closest('.split menu'))document.getElementById('split').classList.remove('open');
+    var a=e.target.closest('.res .add:not(.in)');if(a){a.classList.add('in');a.textContent='✓'}
+    var tab=e.target.closest('[role=tab]');if(tab){document.querySelectorAll('[role=tab]').forEach(function(x){x.setAttribute('aria-selected',String(x===tab))})}
+    var n=e.target.closest('.addnote');if(n){var d=document.createElement('div');d.className='st-note';d.innerHTML='<b>Note</b><textarea rows="1" placeholder="e.g. keep the ribs down"></textarea>';n.closest('.station').appendChild(d);n.remove();d.querySelector('textarea').focus()}
+  });
+  document.addEventListener('change',function(e){var c=e.target.closest('.box .cell');if(c){c.classList.remove('sug');c.classList.toggle('unset',e.target.value==='0'||e.target.value==='ongoing');var st=c.closest('.st-dose');if(st&&!st.querySelector('.cell.sug')){var k=st.querySelector('.sug-key');if(k)k.remove()}}});
+  document.querySelectorAll('#spine .station').forEach(function(st){st.addEventListener('focusin',function(){document.querySelectorAll('#spine>li').forEach(function(l){l.classList.remove('focus')});st.closest('li').classList.add('focus')})});
+  var q=new URLSearchParams(location.search);
+  if(q.get('vp'))vp(q.get('vp'));
+  if(q.get('mode')==='preview')document.querySelector('[data-mode=preview]').click();
+  if(q.get('menu'))document.getElementById('split').classList.add('open');
+  if(q.get('lib'))app.classList.add('lib-open');
+  if(q.get('chrome')==='0')document.querySelector('.mockbar').style.display='none';
+})();
+</script>
+</body>
+</html>
